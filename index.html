@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>오답 체크 - 교재 선택</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    margin: 0;
+    background: #f5f3ee;
+    color: #2d2a24;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 30px 20px 80px;
+  }
+  h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 24px;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+  .header-sub {
+    color: #8b8680;
+    font-size: 13px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .subject-section {
+    margin-bottom: 28px;
+  }
+  .subject-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #5d7a5b;
+    margin: 0 0 10px 4px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #5d7a5b;
+  }
+  .book-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .book-card {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .book-card:hover, .book-card:active {
+    border-color: #5d7a5b;
+    background: #faf8f3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .book-title {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .book-arrow {
+    color: #5d7a5b;
+    font-size: 20px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 20px 14px 60px; }
+    h1 { font-size: 20px; }
+    .book-card { padding: 14px 16px; }
+    .book-title { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📚 오답 체크</h1>
+  <div class="header-sub">교재를 선택하세요</div>
+  <section class="subject-section"><h2 class="subject-title">대수</h2><div class="book-list"><a class="book-card" href="오답체크_학생_마더텅_대수.html"><div class="book-title">마더텅</div><div class="book-arrow">→</div></a></div></section>
+</div>
+</body>
+</html>
