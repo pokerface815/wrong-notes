@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>오답 체크 (개념루트_미적분1)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    margin: 0;
+    background: #f5f3ee;
+    color: #2d2a24;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 30px 20px 100px;
+  }
+  h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .header-sub {
+    color: #8b8680;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  /* 이름 입력 화면 */
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .name-card {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    padding: 40px 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    text-align: center;
+    margin-top: 40px;
+  }
+  .name-card h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+  .name-card p {
+    color: #6b665e;
+    font-size: 13px;
+    margin: 0 0 24px;
+  }
+  .name-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1.5px solid #d9d4c8;
+    border-radius: 8px;
+    font-family: inherit;
+    text-align: center;
+    background: #faf8f3;
+  }
+  .name-input:focus {
+    outline: none;
+    border-color: #5d7a5b;
+    background: white;
+  }
+  .btn {
+    background: #5d7a5b;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 16px;
+    font-family: inherit;
+  }
+  .btn:hover { background: #4a6349; }
+  .btn:disabled { background: #bfbbb2; cursor: not-allowed; }
+  .btn.btn-lg { padding: 14px 32px; font-size: 15px; }
+  .btn.btn-danger { background: #b85c5c; }
+  .btn.btn-danger:hover { background: #9c4a4a; }
+
+  .btn-mini {
+    background: white;
+    color: #5d7a5b;
+    border: 1px solid #d9d4c8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-mini:hover { border-color: #5d7a5b; background: #faf8f3; }
+
+  /* 단원 선택 */
+  .unit-field { margin-bottom: 14px; }
+  .unit-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b665e;
+    margin-bottom: 6px;
+  }
+  .unit-select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border: 1.5px solid #d9d4c8;
+    border-radius: 8px;
+    background: #faf8f3;
+    font-family: inherit;
+    color: #2d2a24;
+  }
+  .unit-select:focus { outline: none; border-color: #5d7a5b; background: white; }
+
+  /* 체크 화면 */
+  .group {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .group-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebe6db;
+    background: #faf8f3;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .group-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .group-select-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .group-select-all:hover { border-color: #5d7a5b; }
+  .group-select-all input {
+    margin: 0;
+    accent-color: #5d7a5b;
+  }
+  .group-select-all.all-checked {
+    background: #e8f0e5;
+    border-color: #5d7a5b;
+    color: #3d5a3b;
+  }
+  .group-subject {
+    font-size: 11px;
+    color: #8b8680;
+    margin-bottom: 2px;
+  }
+  .group-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .group-path {
+    font-size: 12px;
+    color: #6b665e;
+    margin-top: 2px;
+  }
+  .problem-list {
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .problem-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #faf8f3;
+    border: 1px solid #ebe6db;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 13px;
+    transition: all 0.1s;
+  }
+  .problem-item:hover { border-color: #bfbbb2; }
+  .problem-item.checked {
+    background: #e8f0e5;
+    border-color: #5d7a5b;
+    color: #3d5a3b;
+  }
+  .problem-item input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #5d7a5b;
+    flex-shrink: 0;
+  }
+  .problem-num {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .problem-diff {
+    font-size: 10px;
+    color: #8b8680;
+    flex-shrink: 0;
+  }
+
+  /* 하단 의견 + 제출 */
+  .bottom-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+  }
+  .comment-box {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    font-size: 13px;
+    border: 1px solid #d9d4c8;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    background: #faf8f3;
+    color: #2d2a24;
+  }
+  .comment-box.placeholder { color: #a8a39a; font-style: italic; }
+  .comment-box:focus {
+    outline: none;
+    border-color: #5d7a5b;
+    background: white;
+  }
+
+  .submit-bar {
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .submit-info {
+    font-size: 13px;
+    color: #6b665e;
+  }
+  .submit-info b { color: #3d5a3b; font-size: 16px; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d2a24;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  /* 모바일 최적화 */
+  @media (max-width: 600px) {
+    .container { padding: 20px 14px 100px; }
+    h1 { font-size: 18px; }
+    .name-card { padding: 28px 20px; margin-top: 20px; }
+    .name-card h2 { font-size: 16px; }
+    .problem-list {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 6px;
+    }
+    .problem-item {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .problem-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    .group-header {
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .group-select-all {
+      align-self: flex-end;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .group-select-all input {
+      width: 18px;
+      height: 18px;
+    }
+    .submit-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .submit-bar .btn {
+      width: 100%;
+    }
+    .comment-box {
+      min-height: 120px;
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<noscript>
+<div style="background:#fef3e5;border:1px solid #f0c87a;color:#8a5a1a;padding:14px 18px;margin:20px;border-radius:8px;font-size:13px;line-height:1.6;">
+  ⚠️ <b>이 화면은 파일 미리보기예요.</b><br>
+  왼쪽 아래 <b>공유 버튼(⬆️)</b> → <b>"Safari에서 열기"</b> 또는 <b>"Chrome에서 열기"</b>를 눌러주세요.<br>
+  그래야 문제 체크 화면이 나타납니다.
+</div>
+</noscript>
+
+<div class="container">
+
+  <!-- 1단계: 이름 입력 -->
+  <div id="screen-name" class="screen">
+    <h1>오답 체크 제출</h1>
+    <div class="header-sub">개념루트_미적분1 · 총 14문제</div>
+    <div class="name-card">
+      <h2>이름을 입력해주세요</h2>
+      <p>이름을 입력한 후 다음 단계로 넘어갈 수 있어요.</p>
+      <input type="text" id="nameInput" class="name-input" placeholder="이름" autocomplete="off">
+      <br>
+      <button id="nameNextBtn" class="btn btn-lg" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- 2단계: 단원 선택 -->
+  <div id="screen-unit" class="screen">
+    <h1 id="unitTitle">단원 선택</h1>
+    <div class="header-sub">오답 체크할 단원을 골라주세요. 전체로 두면 모든 문제가 나옵니다.</div>
+    <div class="name-card" style="text-align:left;">
+      <div class="unit-field">
+        <label class="unit-label">대단원</label>
+        <select id="unit1Select" class="unit-select"></select>
+      </div>
+      <div class="unit-field">
+        <label class="unit-label">중단원</label>
+        <select id="unit2Select" class="unit-select"></select>
+      </div>
+      <div class="unit-field">
+        <label class="unit-label">소단원</label>
+        <select id="unit3Select" class="unit-select"></select>
+      </div>
+      <div id="unitMatchCount" style="font-size:13px;color:#6b665e;margin-top:16px;text-align:center;">
+        — 이 범위에 <b>0</b>문제 —
+      </div>
+      <div style="text-align:center;margin-top:14px;">
+        <button id="unitNextBtn" class="btn btn-lg">이 범위로 시작 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3단계: 문제 체크 -->
+  <div id="screen-check" class="screen">
+    <h1 id="checkTitle">오답 체크</h1>
+    <div class="header-sub" id="checkSubHeader"></div>
+    <div style="margin-bottom:12px;">
+      <button class="btn-mini" onclick="showScreen('unit')">↩ 다른 단원 선택</button>
+    </div>
+    <div id="groupsContainer"></div>
+
+    <div class="bottom-section">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">선생님께 전하고 싶은 말</div>
+      <textarea id="commentBox" class="comment-box placeholder">이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.</textarea>
+
+      <div class="submit-bar">
+        <div class="submit-info">체크한 문제: <b id="checkedCount">0</b></div>
+        <button class="btn btn-lg" onclick="submitFile()">📤 결과 파일 다운로드</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- 오류 시 화면에 표시 (빈 화면 방지) -->
+<div id="errorBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#b85c5c;color:white;padding:12px 16px;font-size:12px;z-index:9999;line-height:1.5;"></div>
+
+<script>
+// 전역 에러 핸들러: 어떤 오류든 빈 화면 대신 메시지 표시
+window.addEventListener('error', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.innerHTML = '⚠️ 스크립트 오류: ' + (e.message || e.error || '알 수 없음') +
+        '<br><b>카카오톡 내장 브라우저에서 발생한 문제일 수 있어요.</b>' +
+        '<br>오른쪽 위 메뉴(⋯ 또는 ⋮)를 눌러서 <b>"다른 브라우저로 열기"</b>를 선택해주세요.';
+    }
+  } catch (ignore) {}
+});
+window.addEventListener('unhandledrejection', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '⚠️ 오류: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+    }
+  } catch (ignore) {}
+});
+
+var DATA = {"studentName":"","suffix":"개념루트_미적분1","groups":[{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"","problems":[{"id":"prob_00001","num":"1","diff":""},{"id":"prob_00002","num":"2","diff":""},{"id":"prob_00003","num":"3","diff":""},{"id":"prob_00004","num":"4","diff":""},{"id":"prob_00005","num":"5","diff":""},{"id":"prob_00006","num":"6","diff":""},{"id":"prob_00007","num":"7","diff":""},{"id":"prob_00008","num":"8","diff":""},{"id":"prob_00009","num":"9","diff":""},{"id":"prob_00010","num":"10","diff":""},{"id":"prob_00011","num":"11","diff":""},{"id":"prob_00012","num":"12","diff":""},{"id":"prob_00013","num":"13","diff":""},{"id":"prob_00014","num":"14","diff":""}]}],"totalCount":14,"createdAt":"2026-04-24T12:53:01.726Z"};
+var checkedIds = {};  // Set 대신 객체 사용 (구형 브라우저 호환)
+var checkedCount = 0;
+var COMMENT_PLACEHOLDER = '이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.';
+var groupItemRegistry = {};
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function showScreen(name) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  var target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+function updateCheckedCount() {
+  var el = document.getElementById('checkedCount');
+  if (el) el.textContent = checkedCount;
+}
+
+// ===== 이름 입력 =====
+function initNameScreen() {
+  var input = document.getElementById('nameInput');
+  var btn = document.getElementById('nameNextBtn');
+  if (!input || !btn) return;
+
+  if (DATA.studentName) {
+    input.value = DATA.studentName;
+    btn.disabled = false;
+  }
+
+  input.addEventListener('input', function() {
+    btn.disabled = input.value.trim().length === 0;
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !btn.disabled) btn.click();
+  });
+  btn.addEventListener('click', function() {
+    DATA.studentName = input.value.trim();
+    initUnitScreen();
+    showScreen('unit');
+  });
+}
+
+// ===== 단원 선택 화면 =====
+var selectedUnits = { unit1: '', unit2: '', unit3: '' };
+var filteredGroups = [];  // 현재 필터에 해당하는 그룹들
+
+function initUnitScreen() {
+  var title = document.getElementById('unitTitle');
+  if (title) title.textContent = DATA.studentName + ' 학생 - 단원 선택';
+
+  // 대단원 목록 추출 (중복 제거, 빈값 제외)
+  var unit1Set = {};
+  for (var i = 0; i < DATA.groups.length; i++) {
+    var u = DATA.groups[i].unit1 || '';
+    if (u) unit1Set[u] = true;
+  }
+  var unit1List = Object.keys(unit1Set);
+
+  // 대단원 드롭다운 채우기
+  fillSelect('unit1Select', unit1List, '전체 대단원');
+
+  // 대단원 변경 시 중단원 리스트 업데이트
+  document.getElementById('unit1Select').addEventListener('change', function() {
+    selectedUnits.unit1 = this.value;
+    selectedUnits.unit2 = '';
+    selectedUnits.unit3 = '';
+    updateUnit2Options();
+    updateMatchCount();
+  });
+  document.getElementById('unit2Select').addEventListener('change', function() {
+    selectedUnits.unit2 = this.value;
+    selectedUnits.unit3 = '';
+    updateUnit3Options();
+    updateMatchCount();
+  });
+  document.getElementById('unit3Select').addEventListener('change', function() {
+    selectedUnits.unit3 = this.value;
+    updateMatchCount();
+  });
+
+  // 초기 상태
+  selectedUnits = { unit1: '', unit2: '', unit3: '' };
+  updateUnit2Options();
+  updateUnit3Options();
+  updateMatchCount();
+
+  // 다음 버튼
+  var nextBtn = document.getElementById('unitNextBtn');
+  nextBtn.onclick = function() {
+    applyUnitFilter();
+    renderCheckScreen();
+    showScreen('check');
+  };
+}
+
+function fillSelect(selectId, options, allLabel) {
+  var sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = '';
+  var optAll = document.createElement('option');
+  optAll.value = '';
+  optAll.textContent = allLabel;
+  sel.appendChild(optAll);
+  for (var i = 0; i < options.length; i++) {
+    var opt = document.createElement('option');
+    opt.value = options[i];
+    opt.textContent = options[i];
+    sel.appendChild(opt);
+  }
+}
+
+function updateUnit2Options() {
+  var set = {};
+  for (var i = 0; i < DATA.groups.length; i++) {
+    var g = DATA.groups[i];
+    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
+    if (g.unit2) set[g.unit2] = true;
+  }
+  fillSelect('unit2Select', Object.keys(set), '전체 중단원');
+  document.getElementById('unit2Select').value = '';
+}
+
+function updateUnit3Options() {
+  var set = {};
+  for (var i = 0; i < DATA.groups.length; i++) {
+    var g = DATA.groups[i];
+    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
+    if (selectedUnits.unit2 && g.unit2 !== selectedUnits.unit2) continue;
+    if (g.unit3) set[g.unit3] = true;
+  }
+  fillSelect('unit3Select', Object.keys(set), '전체 소단원');
+  document.getElementById('unit3Select').value = '';
+}
+
+function updateMatchCount() {
+  var count = 0;
+  for (var i = 0; i < DATA.groups.length; i++) {
+    var g = DATA.groups[i];
+    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
+    if (selectedUnits.unit2 && g.unit2 !== selectedUnits.unit2) continue;
+    if (selectedUnits.unit3 && g.unit3 !== selectedUnits.unit3) continue;
+    count += g.problems.length;
+  }
+  var el = document.getElementById('unitMatchCount');
+  if (el) {
+    el.innerHTML = '— 이 범위에 <b>' + count + '</b>문제 —';
+  }
+  var btn = document.getElementById('unitNextBtn');
+  if (btn) btn.disabled = count === 0;
+}
+
+function applyUnitFilter() {
+  filteredGroups = [];
+  for (var i = 0; i < DATA.groups.length; i++) {
+    var g = DATA.groups[i];
+    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
+    if (selectedUnits.unit2 && g.unit2 !== selectedUnits.unit2) continue;
+    if (selectedUnits.unit3 && g.unit3 !== selectedUnits.unit3) continue;
+    filteredGroups.push(g);
+  }
+}
+
+// ===== 의견 박스 =====
+function initCommentBox() {
+  var commentBox = document.getElementById('commentBox');
+  if (!commentBox) return;
+  commentBox.addEventListener('focus', function() {
+    if (commentBox.classList.contains('placeholder')) {
+      commentBox.value = '';
+      commentBox.classList.remove('placeholder');
+    }
+  });
+  commentBox.addEventListener('blur', function() {
+    if (commentBox.value.trim() === '') {
+      commentBox.value = COMMENT_PLACEHOLDER;
+      commentBox.classList.add('placeholder');
+    }
+  });
+}
+
+// ===== 체크 화면 렌더 =====
+function renderCheckScreen() {
+  var titleEl = document.getElementById('checkTitle');
+  if (titleEl) titleEl.textContent = DATA.studentName + ' 학생의 오답 체크';
+
+  // 현재 필터된 총 문제 수 계산
+  var filteredCount = 0;
+  for (var i = 0; i < filteredGroups.length; i++) {
+    filteredCount += filteredGroups[i].problems.length;
+  }
+
+  // 서브 헤더: 현재 선택된 단원 표시
+  var unitPath = [];
+  if (selectedUnits.unit1) unitPath.push(selectedUnits.unit1);
+  else unitPath.push('전체');
+  if (selectedUnits.unit2) unitPath.push(selectedUnits.unit2);
+  if (selectedUnits.unit3) unitPath.push(selectedUnits.unit3);
+  var sub = unitPath.join(' › ') + ' · 총 ' + filteredCount + '문제';
+  var subEl = document.getElementById('checkSubHeader');
+  if (subEl) subEl.textContent = sub;
+
+  var container = document.getElementById('groupsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  groupItemRegistry = {};
+
+  if (filteredGroups.length === 0) {
+    container.innerHTML = '<div style="background:#fef3e5;padding:20px;border-radius:8px;text-align:center;color:#8a5a1a;">이 단원에 문제가 없습니다.</div>';
+    return;
+  }
+
+  for (var gIdx = 0; gIdx < filteredGroups.length; gIdx++) {
+    buildGroupCard(container, filteredGroups[gIdx], gIdx);
+  }
+}
+
+function buildGroupCard(container, g, gIdx) {
+  var groupEl = document.createElement('div');
+  groupEl.className = 'group';
+
+  // 헤더
+  var unitParts = [];
+  if (g.unit1) unitParts.push(g.unit1);
+  if (g.unit2) unitParts.push(g.unit2);
+  if (g.unit3) unitParts.push(g.unit3);
+  var mainTitle = unitParts.length > 0 ? unitParts[unitParts.length - 1] : '(단원 미지정)';
+  var pathParts = unitParts.slice(0, -1);
+
+  var contentHtml = '';
+  if (g.subject || g.book) {
+    var sbParts = [];
+    if (g.subject) sbParts.push(g.subject);
+    if (g.book) sbParts.push(g.book);
+    contentHtml += '<div class="group-subject">' + escapeHtml(sbParts.join(' · ')) + '</div>';
+  }
+  contentHtml += '<div class="group-title">' + escapeHtml(mainTitle) + '</div>';
+  if (pathParts.length > 0) {
+    contentHtml += '<div class="group-path">' + escapeHtml(pathParts.join(' › ')) + '</div>';
+  }
+
+  var headerEl = document.createElement('div');
+  headerEl.className = 'group-header';
+  headerEl.innerHTML =
+    '<div class="group-header-content">' + contentHtml + '</div>' +
+    '<label class="group-select-all" data-group-idx="' + gIdx + '">' +
+      '<input type="checkbox" class="group-all-cb">' +
+      '<span>모두</span>' +
+    '</label>';
+  groupEl.appendChild(headerEl);
+
+  var listEl = document.createElement('div');
+  listEl.className = 'problem-list';
+  var itemsInGroup = [];
+
+  for (var i = 0; i < g.problems.length; i++) {
+    (function(p) {
+      var item = document.createElement('label');
+      item.className = 'problem-item';
+      item.innerHTML =
+        '<input type="checkbox" data-id="' + escapeAttr(p.id) + '">' +
+        '<span class="problem-num">' + escapeHtml(p.num || '(번호없음)') + '</span>' +
+        (p.diff ? '<span class="problem-diff">' + escapeHtml(p.diff) + '</span>' : '');
+      var cb = item.querySelector('input');
+      cb.addEventListener('change', function() {
+        if (cb.checked) {
+          if (!checkedIds[p.id]) { checkedIds[p.id] = true; checkedCount++; }
+          item.classList.add('checked');
+        } else {
+          if (checkedIds[p.id]) { delete checkedIds[p.id]; checkedCount--; }
+          item.classList.remove('checked');
+        }
+        updateCheckedCount();
+        updateGroupAllState(gIdx);
+      });
+      listEl.appendChild(item);
+      itemsInGroup.push({ cb: cb, item: item, id: p.id });
+    })(g.problems[i]);
+  }
+  groupEl.appendChild(listEl);
+  container.appendChild(groupEl);
+
+  // 전체선택 핸들러
+  var groupAllLabel = headerEl.querySelector('.group-select-all');
+  var groupAllCb = headerEl.querySelector('.group-all-cb');
+  groupAllCb.addEventListener('change', function() {
+    var on = groupAllCb.checked;
+    for (var j = 0; j < itemsInGroup.length; j++) {
+      var it = itemsInGroup[j];
+      it.cb.checked = on;
+      if (on) {
+        if (!checkedIds[it.id]) { checkedIds[it.id] = true; checkedCount++; }
+        it.item.classList.add('checked');
+      } else {
+        if (checkedIds[it.id]) { delete checkedIds[it.id]; checkedCount--; }
+        it.item.classList.remove('checked');
+      }
+    }
+    groupAllLabel.classList.toggle('all-checked', on);
+    updateCheckedCount();
+  });
+
+  groupItemRegistry[gIdx] = { itemsInGroup: itemsInGroup, groupAllLabel: groupAllLabel, groupAllCb: groupAllCb };
+}
+
+function updateGroupAllState(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var allChecked = true;
+  var anyChecked = false;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) anyChecked = true;
+    else allChecked = false;
+  }
+  reg.groupAllCb.checked = allChecked;
+  try { reg.groupAllCb.indeterminate = !allChecked && anyChecked; } catch (e) {}
+  reg.groupAllLabel.classList.toggle('all-checked', allChecked);
+}
+
+// ===== 결과 파일 제출 =====
+function submitFile() {
+  var checkedIdList = Object.keys(checkedIds);
+  if (checkedIdList.length === 0) {
+    if (!confirm('체크한 문제가 없습니다. 그래도 제출하시겠습니까?')) return;
+  }
+  var commentBox = document.getElementById('commentBox');
+  var comment = commentBox.classList.contains('placeholder') ? '' : commentBox.value.trim();
+
+  var now = new Date();
+  var yyyy = now.getFullYear();
+  var mm = String(now.getMonth() + 1);
+  if (mm.length < 2) mm = '0' + mm;
+  var dd = String(now.getDate());
+  if (dd.length < 2) dd = '0' + dd;
+  var dateStr = yyyy + mm + dd;
+
+  var result = {
+    type: 'wrong-note-submission',
+    version: 1,
+    studentName: DATA.studentName,
+    suffix: DATA.suffix,
+    selectedUnits: selectedUnits,
+    submittedAt: now.toISOString(),
+    originalCreatedAt: DATA.createdAt,
+    checkedIds: checkedIdList,
+    comment: comment
+  };
+
+  var safeName = (DATA.studentName || '학생').replace(/[\/\\:*?"<>|]/g, '_');
+  var safeSuffix = DATA.suffix ? '_' + DATA.suffix.replace(/[\/\\:*?"<>|]/g, '_') : '';
+  var filename = '오답제출_' + safeName + safeSuffix + '_' + dateStr + '.json';
+  var jsonText = JSON.stringify(result, null, 2);
+
+  // 모바일에서 Web Share API 시도
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  try {
+    if (isMobile && window.File && navigator.canShare) {
+      var file = new File([jsonText], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: '오답 제출 - ' + (DATA.studentName || ''),
+          text: filename
+        }).then(function() {
+          showToast('공유 완료!');
+        }).catch(function(err) {
+          if (err && err.name === 'AbortError') return;
+          fallbackDownload(jsonText, filename, isMobile);
+        });
+        return;
+      }
+    }
+  } catch (e) {}
+
+  fallbackDownload(jsonText, filename, isMobile);
+}
+
+function fallbackDownload(jsonText, filename, isMobile) {
+  try {
+    var blob = new Blob([jsonText], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    showToast(isMobile ? '다운로드 완료! 선생님께 보내주세요' : '파일이 다운로드되었습니다');
+  } catch (e) {
+    // 최후 폴백: 텍스트를 화면에 보여주고 복사하도록
+    var fallbackArea = document.createElement('div');
+    fallbackArea.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:white;padding:20px;overflow:auto;z-index:99999;';
+    fallbackArea.innerHTML =
+      '<h2 style="margin-top:0;">⚠️ 다운로드가 안 되는 환경입니다</h2>' +
+      '<p>아래 내용을 모두 선택해서 복사하고, 메모장에 붙여넣기 하여 ' + escapeHtml(filename) + ' 이름으로 저장해주세요.</p>' +
+      '<button onclick="this.parentElement.remove()" style="margin-bottom:10px;">닫기</button>' +
+      '<textarea readonly style="width:100%;height:60vh;font-family:monospace;font-size:11px;">' +
+      escapeHtml(jsonText) + '</textarea>';
+    document.body.appendChild(fallbackArea);
+  }
+}
+
+// ===== 초기화 (DOMContentLoaded 대신 즉시 실행) =====
+function init() {
+  try {
+    initNameScreen();
+    initCommentBox();
+    showScreen('name');
+  } catch (e) {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '⚠️ 초기화 오류: ' + e.message;
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
