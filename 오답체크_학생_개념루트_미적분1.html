@@ -98,26 +98,61 @@
   }
   .btn-mini:hover { border-color: #5d7a5b; background: #faf8f3; }
 
-  /* 단원 선택 */
-  .unit-field { margin-bottom: 14px; }
-  .unit-label {
-    display: block;
-    font-size: 12px;
+  /* 요약 바: 상단에 선택 개수 표시 */
+  .summary-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .summary-bar b { color: #3d5a3b; font-size: 16px; }
+
+  /* 아코디언 그룹 */
+  .group.collapsible .group-header {
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .group.collapsible .group-header:hover {
+    background: #f0ece0;
+  }
+  .group-expand-icon {
+    font-size: 14px;
+    color: #8b8680;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .group.expanded .group-expand-icon {
+    transform: rotate(90deg);
+  }
+  .group .problem-list {
+    display: none;
+  }
+  .group.expanded .problem-list {
+    display: grid;
+  }
+  .group-check-badge {
+    display: inline-block;
+    background: #5d7a5b;
+    color: white;
+    font-size: 11px;
     font-weight: 600;
-    color: #6b665e;
-    margin-bottom: 6px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
   }
-  .unit-select {
-    width: 100%;
-    padding: 12px;
-    font-size: 15px;
-    border: 1.5px solid #d9d4c8;
-    border-radius: 8px;
-    background: #faf8f3;
-    font-family: inherit;
-    color: #2d2a24;
+  .group-check-badge.zero {
+    display: none;
   }
-  .unit-select:focus { outline: none; border-color: #5d7a5b; background: white; }
 
   /* 체크 화면 */
   .group {
@@ -351,39 +386,16 @@
     </div>
   </div>
 
-  <!-- 2단계: 단원 선택 -->
-  <div id="screen-unit" class="screen">
-    <h1 id="unitTitle">단원 선택</h1>
-    <div class="header-sub">오답 체크할 단원을 골라주세요. 전체로 두면 모든 문제가 나옵니다.</div>
-    <div class="name-card" style="text-align:left;">
-      <div class="unit-field">
-        <label class="unit-label">대단원</label>
-        <select id="unit1Select" class="unit-select"></select>
-      </div>
-      <div class="unit-field">
-        <label class="unit-label">중단원</label>
-        <select id="unit2Select" class="unit-select"></select>
-      </div>
-      <div class="unit-field">
-        <label class="unit-label">소단원</label>
-        <select id="unit3Select" class="unit-select"></select>
-      </div>
-      <div id="unitMatchCount" style="font-size:13px;color:#6b665e;margin-top:16px;text-align:center;">
-        — 이 범위에 <b>0</b>문제 —
-      </div>
-      <div style="text-align:center;margin-top:14px;">
-        <button id="unitNextBtn" class="btn btn-lg">이 범위로 시작 →</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3단계: 문제 체크 -->
+  <!-- 2단계: 문제 체크 (아코디언) -->
   <div id="screen-check" class="screen">
     <h1 id="checkTitle">오답 체크</h1>
-    <div class="header-sub" id="checkSubHeader"></div>
-    <div style="margin-bottom:12px;">
-      <button class="btn-mini" onclick="showScreen('unit')">↩ 다른 단원 선택</button>
+    <div class="header-sub" id="checkSubHeader">단원을 눌러서 펼친 후, 틀린 문제를 체크하세요</div>
+
+    <div id="summaryBar" class="summary-bar">
+      <div>선택된 문제 <b id="summaryCount">0</b>개</div>
+      <button class="btn-mini" onclick="collapseAllUnits()">모두 접기</button>
     </div>
+
     <div id="groupsContainer"></div>
 
     <div class="bottom-section">
@@ -427,7 +439,7 @@ window.addEventListener('unhandledrejection', function(e) {
   } catch (ignore) {}
 });
 
-var DATA = {"studentName":"","suffix":"개념루트_미적분1","groups":[{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"","problems":[{"id":"prob_00001","num":"1","diff":""},{"id":"prob_00002","num":"2","diff":""},{"id":"prob_00003","num":"3","diff":""},{"id":"prob_00004","num":"4","diff":""},{"id":"prob_00005","num":"5","diff":""},{"id":"prob_00006","num":"6","diff":""},{"id":"prob_00007","num":"7","diff":""},{"id":"prob_00008","num":"8","diff":""},{"id":"prob_00009","num":"9","diff":""},{"id":"prob_00010","num":"10","diff":""},{"id":"prob_00011","num":"11","diff":""},{"id":"prob_00012","num":"12","diff":""},{"id":"prob_00013","num":"13","diff":""},{"id":"prob_00014","num":"14","diff":""}]}],"totalCount":14,"createdAt":"2026-04-24T12:53:01.726Z"};
+var DATA = {"studentName":"","suffix":"개념루트_미적분1","groups":[{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"","problems":[{"id":"prob_00001","num":"1","diff":""},{"id":"prob_00002","num":"2","diff":""},{"id":"prob_00003","num":"3","diff":""},{"id":"prob_00004","num":"4","diff":""},{"id":"prob_00005","num":"5","diff":""},{"id":"prob_00006","num":"6","diff":""},{"id":"prob_00007","num":"7","diff":""},{"id":"prob_00008","num":"8","diff":""},{"id":"prob_00009","num":"9","diff":""},{"id":"prob_00010","num":"10","diff":""},{"id":"prob_00011","num":"11","diff":""},{"id":"prob_00012","num":"12","diff":""},{"id":"prob_00013","num":"13","diff":""},{"id":"prob_00014","num":"14","diff":""}]}],"totalCount":14,"createdAt":"2026-04-28T09:41:32.666Z"};
 var checkedIds = {};  // Set 대신 객체 사용 (구형 브라우저 호환)
 var checkedCount = 0;
 var COMMENT_PLACEHOLDER = '이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.';
@@ -479,129 +491,9 @@ function initNameScreen() {
   });
   btn.addEventListener('click', function() {
     DATA.studentName = input.value.trim();
-    initUnitScreen();
-    showScreen('unit');
-  });
-}
-
-// ===== 단원 선택 화면 =====
-var selectedUnits = { unit1: '', unit2: '', unit3: '' };
-var filteredGroups = [];  // 현재 필터에 해당하는 그룹들
-
-function initUnitScreen() {
-  var title = document.getElementById('unitTitle');
-  if (title) title.textContent = DATA.studentName + ' 학생 - 단원 선택';
-
-  // 대단원 목록 추출 (중복 제거, 빈값 제외)
-  var unit1Set = {};
-  for (var i = 0; i < DATA.groups.length; i++) {
-    var u = DATA.groups[i].unit1 || '';
-    if (u) unit1Set[u] = true;
-  }
-  var unit1List = Object.keys(unit1Set);
-
-  // 대단원 드롭다운 채우기
-  fillSelect('unit1Select', unit1List, '전체 대단원');
-
-  // 대단원 변경 시 중단원 리스트 업데이트
-  document.getElementById('unit1Select').addEventListener('change', function() {
-    selectedUnits.unit1 = this.value;
-    selectedUnits.unit2 = '';
-    selectedUnits.unit3 = '';
-    updateUnit2Options();
-    updateMatchCount();
-  });
-  document.getElementById('unit2Select').addEventListener('change', function() {
-    selectedUnits.unit2 = this.value;
-    selectedUnits.unit3 = '';
-    updateUnit3Options();
-    updateMatchCount();
-  });
-  document.getElementById('unit3Select').addEventListener('change', function() {
-    selectedUnits.unit3 = this.value;
-    updateMatchCount();
-  });
-
-  // 초기 상태
-  selectedUnits = { unit1: '', unit2: '', unit3: '' };
-  updateUnit2Options();
-  updateUnit3Options();
-  updateMatchCount();
-
-  // 다음 버튼
-  var nextBtn = document.getElementById('unitNextBtn');
-  nextBtn.onclick = function() {
-    applyUnitFilter();
     renderCheckScreen();
     showScreen('check');
-  };
-}
-
-function fillSelect(selectId, options, allLabel) {
-  var sel = document.getElementById(selectId);
-  if (!sel) return;
-  sel.innerHTML = '';
-  var optAll = document.createElement('option');
-  optAll.value = '';
-  optAll.textContent = allLabel;
-  sel.appendChild(optAll);
-  for (var i = 0; i < options.length; i++) {
-    var opt = document.createElement('option');
-    opt.value = options[i];
-    opt.textContent = options[i];
-    sel.appendChild(opt);
-  }
-}
-
-function updateUnit2Options() {
-  var set = {};
-  for (var i = 0; i < DATA.groups.length; i++) {
-    var g = DATA.groups[i];
-    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
-    if (g.unit2) set[g.unit2] = true;
-  }
-  fillSelect('unit2Select', Object.keys(set), '전체 중단원');
-  document.getElementById('unit2Select').value = '';
-}
-
-function updateUnit3Options() {
-  var set = {};
-  for (var i = 0; i < DATA.groups.length; i++) {
-    var g = DATA.groups[i];
-    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
-    if (selectedUnits.unit2 && g.unit2 !== selectedUnits.unit2) continue;
-    if (g.unit3) set[g.unit3] = true;
-  }
-  fillSelect('unit3Select', Object.keys(set), '전체 소단원');
-  document.getElementById('unit3Select').value = '';
-}
-
-function updateMatchCount() {
-  var count = 0;
-  for (var i = 0; i < DATA.groups.length; i++) {
-    var g = DATA.groups[i];
-    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
-    if (selectedUnits.unit2 && g.unit2 !== selectedUnits.unit2) continue;
-    if (selectedUnits.unit3 && g.unit3 !== selectedUnits.unit3) continue;
-    count += g.problems.length;
-  }
-  var el = document.getElementById('unitMatchCount');
-  if (el) {
-    el.innerHTML = '— 이 범위에 <b>' + count + '</b>문제 —';
-  }
-  var btn = document.getElementById('unitNextBtn');
-  if (btn) btn.disabled = count === 0;
-}
-
-function applyUnitFilter() {
-  filteredGroups = [];
-  for (var i = 0; i < DATA.groups.length; i++) {
-    var g = DATA.groups[i];
-    if (selectedUnits.unit1 && g.unit1 !== selectedUnits.unit1) continue;
-    if (selectedUnits.unit2 && g.unit2 !== selectedUnits.unit2) continue;
-    if (selectedUnits.unit3 && g.unit3 !== selectedUnits.unit3) continue;
-    filteredGroups.push(g);
-  }
+  });
 }
 
 // ===== 의견 박스 =====
@@ -627,40 +519,41 @@ function renderCheckScreen() {
   var titleEl = document.getElementById('checkTitle');
   if (titleEl) titleEl.textContent = DATA.studentName + ' 학생의 오답 체크';
 
-  // 현재 필터된 총 문제 수 계산
-  var filteredCount = 0;
-  for (var i = 0; i < filteredGroups.length; i++) {
-    filteredCount += filteredGroups[i].problems.length;
-  }
-
-  // 서브 헤더: 현재 선택된 단원 표시
-  var unitPath = [];
-  if (selectedUnits.unit1) unitPath.push(selectedUnits.unit1);
-  else unitPath.push('전체');
-  if (selectedUnits.unit2) unitPath.push(selectedUnits.unit2);
-  if (selectedUnits.unit3) unitPath.push(selectedUnits.unit3);
-  var sub = unitPath.join(' › ') + ' · 총 ' + filteredCount + '문제';
-  var subEl = document.getElementById('checkSubHeader');
-  if (subEl) subEl.textContent = sub;
-
   var container = document.getElementById('groupsContainer');
   if (!container) return;
   container.innerHTML = '';
   groupItemRegistry = {};
 
-  if (filteredGroups.length === 0) {
-    container.innerHTML = '<div style="background:#fef3e5;padding:20px;border-radius:8px;text-align:center;color:#8a5a1a;">이 단원에 문제가 없습니다.</div>';
+  if (DATA.groups.length === 0) {
+    container.innerHTML = '<div style="background:#fef3e5;padding:20px;border-radius:8px;text-align:center;color:#8a5a1a;">문제가 없습니다.</div>';
     return;
   }
 
-  for (var gIdx = 0; gIdx < filteredGroups.length; gIdx++) {
-    buildGroupCard(container, filteredGroups[gIdx], gIdx);
+  for (var gIdx = 0; gIdx < DATA.groups.length; gIdx++) {
+    buildGroupCard(container, DATA.groups[gIdx], gIdx);
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  var count = 0;
+  for (var id in checkedIds) { if (checkedIds[id]) count++; }
+  var el = document.getElementById('summaryCount');
+  if (el) el.textContent = count;
+  var el2 = document.getElementById('checkedCount');
+  if (el2) el2.textContent = count;
+}
+
+function collapseAllUnits() {
+  var groups = document.querySelectorAll('.group.collapsible');
+  for (var i = 0; i < groups.length; i++) {
+    groups[i].classList.remove('expanded');
   }
 }
 
 function buildGroupCard(container, g, gIdx) {
   var groupEl = document.createElement('div');
-  groupEl.className = 'group';
+  groupEl.className = 'group collapsible';  // 기본 접힘 상태
 
   // 헤더
   var unitParts = [];
@@ -677,7 +570,10 @@ function buildGroupCard(container, g, gIdx) {
     if (g.book) sbParts.push(g.book);
     contentHtml += '<div class="group-subject">' + escapeHtml(sbParts.join(' · ')) + '</div>';
   }
-  contentHtml += '<div class="group-title">' + escapeHtml(mainTitle) + '</div>';
+  contentHtml +=
+    '<div class="group-title">' + escapeHtml(mainTitle) +
+    '<span class="group-check-badge zero" data-badge-idx="' + gIdx + '">0</span>' +
+    '</div>';
   if (pathParts.length > 0) {
     contentHtml += '<div class="group-path">' + escapeHtml(pathParts.join(' › ')) + '</div>';
   }
@@ -689,8 +585,16 @@ function buildGroupCard(container, g, gIdx) {
     '<label class="group-select-all" data-group-idx="' + gIdx + '">' +
       '<input type="checkbox" class="group-all-cb">' +
       '<span>모두</span>' +
-    '</label>';
+    '</label>' +
+    '<span class="group-expand-icon">▶</span>';
   groupEl.appendChild(headerEl);
+
+  // 헤더 클릭 시 펼침/접힘 토글 (단, 전체선택 label/체크박스 클릭 시는 제외)
+  headerEl.addEventListener('click', function(e) {
+    // 전체선택 라벨/체크박스 영역 클릭이면 토글 무시
+    if (e.target.closest('.group-select-all')) return;
+    groupEl.classList.toggle('expanded');
+  });
 
   var listEl = document.createElement('div');
   listEl.className = 'problem-list';
@@ -715,6 +619,8 @@ function buildGroupCard(container, g, gIdx) {
         }
         updateCheckedCount();
         updateGroupAllState(gIdx);
+        updateGroupBadge(gIdx);
+        updateSummary();
       });
       listEl.appendChild(item);
       itemsInGroup.push({ cb: cb, item: item, id: p.id });
@@ -741,9 +647,32 @@ function buildGroupCard(container, g, gIdx) {
     }
     groupAllLabel.classList.toggle('all-checked', on);
     updateCheckedCount();
+    updateGroupBadge(gIdx);
+    updateSummary();
   });
+  // 전체선택 라벨 클릭이 아코디언 토글과 충돌하지 않도록
+  groupAllLabel.addEventListener('click', function(e) { e.stopPropagation(); });
 
-  groupItemRegistry[gIdx] = { itemsInGroup: itemsInGroup, groupAllLabel: groupAllLabel, groupAllCb: groupAllCb };
+  groupItemRegistry[gIdx] = {
+    itemsInGroup: itemsInGroup,
+    groupAllLabel: groupAllLabel,
+    groupAllCb: groupAllCb,
+    groupEl: groupEl
+  };
+}
+
+function updateGroupBadge(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var count = 0;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) count++;
+  }
+  var badge = reg.groupEl.querySelector('.group-check-badge');
+  if (badge) {
+    badge.textContent = count;
+    badge.classList.toggle('zero', count === 0);
+  }
 }
 
 function updateGroupAllState(gIdx) {
@@ -782,7 +711,6 @@ function submitFile() {
     version: 1,
     studentName: DATA.studentName,
     suffix: DATA.suffix,
-    selectedUnits: selectedUnits,
     submittedAt: now.toISOString(),
     originalCreatedAt: DATA.createdAt,
     checkedIds: checkedIdList,
