@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>오답 체크 (개념루트_대수)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    margin: 0;
+    background: #f5f3ee;
+    color: #2d2a24;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 30px 20px 100px;
+  }
+  h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .header-sub {
+    color: #8b8680;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  /* 이름 입력 화면 */
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .name-card {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    padding: 40px 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    text-align: center;
+    margin-top: 40px;
+  }
+  .name-card h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+  .name-card p {
+    color: #6b665e;
+    font-size: 13px;
+    margin: 0 0 24px;
+  }
+  .name-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1.5px solid #d9d4c8;
+    border-radius: 8px;
+    font-family: inherit;
+    text-align: center;
+    background: #faf8f3;
+  }
+  .name-input:focus {
+    outline: none;
+    border-color: #5d7a5b;
+    background: white;
+  }
+  .btn {
+    background: #5d7a5b;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 16px;
+    font-family: inherit;
+  }
+  .btn:hover { background: #4a6349; }
+  .btn:disabled { background: #bfbbb2; cursor: not-allowed; }
+  .btn.btn-lg { padding: 14px 32px; font-size: 15px; }
+  .btn.btn-danger { background: #b85c5c; }
+  .btn.btn-danger:hover { background: #9c4a4a; }
+
+  .btn-mini {
+    background: white;
+    color: #5d7a5b;
+    border: 1px solid #d9d4c8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-mini:hover { border-color: #5d7a5b; background: #faf8f3; }
+
+  /* 요약 바: 상단에 선택 개수 표시 */
+  .summary-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .summary-bar b { color: #3d5a3b; font-size: 16px; }
+
+  /* 아코디언 그룹 */
+  .group.collapsible .group-header {
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .group.collapsible .group-header:hover {
+    background: #f0ece0;
+  }
+  .group-expand-icon {
+    font-size: 14px;
+    color: #8b8680;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .group.expanded .group-expand-icon {
+    transform: rotate(90deg);
+  }
+  .group .problem-list {
+    display: none;
+  }
+  .group.expanded .problem-list {
+    display: grid;
+  }
+  .group-check-badge {
+    display: inline-block;
+    background: #5d7a5b;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .group-check-badge.zero {
+    display: none;
+  }
+
+  /* 체크 화면 */
+  .group {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .group-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebe6db;
+    background: #faf8f3;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .group-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .group-select-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .group-select-all:hover { border-color: #5d7a5b; }
+  .group-select-all input {
+    margin: 0;
+    accent-color: #5d7a5b;
+  }
+  .group-select-all.all-checked {
+    background: #e8f0e5;
+    border-color: #5d7a5b;
+    color: #3d5a3b;
+  }
+  .group-subject {
+    font-size: 11px;
+    color: #8b8680;
+    margin-bottom: 2px;
+  }
+  .group-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .group-path {
+    font-size: 12px;
+    color: #6b665e;
+    margin-top: 2px;
+  }
+  .problem-list {
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .problem-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #faf8f3;
+    border: 1px solid #ebe6db;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 13px;
+    transition: all 0.1s;
+  }
+  .problem-item:hover { border-color: #bfbbb2; }
+  .problem-item.checked {
+    background: #e8f0e5;
+    border-color: #5d7a5b;
+    color: #3d5a3b;
+  }
+  .problem-item input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #5d7a5b;
+    flex-shrink: 0;
+  }
+  .problem-num {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .problem-diff {
+    font-size: 10px;
+    color: #8b8680;
+    flex-shrink: 0;
+  }
+
+  /* 하단 의견 + 제출 */
+  .bottom-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+  }
+  .comment-box {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    font-size: 13px;
+    border: 1px solid #d9d4c8;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    background: #faf8f3;
+    color: #2d2a24;
+  }
+  .comment-box.placeholder { color: #a8a39a; font-style: italic; }
+  .comment-box:focus {
+    outline: none;
+    border-color: #5d7a5b;
+    background: white;
+  }
+
+  .submit-bar {
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .submit-info {
+    font-size: 13px;
+    color: #6b665e;
+  }
+  .submit-info b { color: #3d5a3b; font-size: 16px; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d2a24;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  /* 모바일 최적화 */
+  @media (max-width: 600px) {
+    .container { padding: 20px 14px 100px; }
+    h1 { font-size: 18px; }
+    .name-card { padding: 28px 20px; margin-top: 20px; }
+    .name-card h2 { font-size: 16px; }
+    .problem-list {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 6px;
+    }
+    .problem-item {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .problem-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    .group-header {
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .group-select-all {
+      align-self: flex-end;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .group-select-all input {
+      width: 18px;
+      height: 18px;
+    }
+    .submit-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .submit-bar .btn {
+      width: 100%;
+    }
+    .comment-box {
+      min-height: 120px;
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<noscript>
+<div style="background:#fef3e5;border:1px solid #f0c87a;color:#8a5a1a;padding:14px 18px;margin:20px;border-radius:8px;font-size:13px;line-height:1.6;">
+  ⚠️ <b>이 화면은 파일 미리보기예요.</b><br>
+  왼쪽 아래 <b>공유 버튼(⬆️)</b> → <b>"Safari에서 열기"</b> 또는 <b>"Chrome에서 열기"</b>를 눌러주세요.<br>
+  그래야 문제 체크 화면이 나타납니다.
+</div>
+</noscript>
+
+<div class="container">
+
+  <!-- 1단계: 이름 입력 -->
+  <div id="screen-name" class="screen">
+    <h1>오답 체크 제출</h1>
+    <div class="header-sub">개념루트_대수 · 총 398문제</div>
+    <div class="name-card">
+      <h2>이름을 입력해주세요</h2>
+      <p>이름을 입력한 후 다음 단계로 넘어갈 수 있어요.</p>
+      <input type="text" id="nameInput" class="name-input" placeholder="이름" autocomplete="off">
+      <br>
+      <button id="nameNextBtn" class="btn btn-lg" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- 2단계: 문제 체크 (아코디언) -->
+  <div id="screen-check" class="screen">
+    <h1 id="checkTitle">오답 체크</h1>
+    <div class="header-sub" id="checkSubHeader">단원을 눌러서 펼친 후, 틀린 문제를 체크하세요</div>
+
+    <div id="summaryBar" class="summary-bar">
+      <div>선택된 문제 <b id="summaryCount">0</b>개</div>
+      <button class="btn-mini" onclick="collapseAllUnits()">모두 접기</button>
+    </div>
+
+    <div id="groupsContainer"></div>
+
+    <div class="bottom-section">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">선생님께 전하고 싶은 말</div>
+      <textarea id="commentBox" class="comment-box placeholder">이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.</textarea>
+
+      <div class="submit-bar">
+        <div class="submit-info">체크한 문제: <b id="checkedCount">0</b></div>
+        <button class="btn btn-lg" onclick="submitFile()">📤 결과 파일 다운로드</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- 오류 시 화면에 표시 (빈 화면 방지) -->
+<div id="errorBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#b85c5c;color:white;padding:12px 16px;font-size:12px;z-index:9999;line-height:1.5;"></div>
+
+<script>
+// 전역 에러 핸들러: 어떤 오류든 빈 화면 대신 메시지 표시
+window.addEventListener('error', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.innerHTML = '⚠️ 스크립트 오류: ' + (e.message || e.error || '알 수 없음') +
+        '<br><b>카카오톡 내장 브라우저에서 발생한 문제일 수 있어요.</b>' +
+        '<br>오른쪽 위 메뉴(⋯ 또는 ⋮)를 눌러서 <b>"다른 브라우저로 열기"</b>를 선택해주세요.';
+    }
+  } catch (ignore) {}
+});
+window.addEventListener('unhandledrejection', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '⚠️ 오류: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+    }
+  } catch (ignore) {}
+});
+
+var DATA = {"studentName":"","suffix":"개념루트_대수","groups":[{"subject":"대수","book":"개념루트","unit1":"2. 삼각함수","unit2":"2. 삼각함수의 그래프","unit3":"1. 개념확인","problems":[{"id":"prob_00767","num":"426","diff":""},{"id":"prob_00768","num":"427","diff":""},{"id":"prob_00793","num":"452","diff":""},{"id":"prob_00794","num":"453","diff":""},{"id":"prob_00795","num":"454","diff":""},{"id":"prob_00828","num":"487","diff":""},{"id":"prob_00829","num":"488","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"2. 삼각함수","unit2":"2. 삼각함수의 그래프","unit3":"2. 유제","problems":[{"id":"prob_00769","num":"428","diff":""},{"id":"prob_00770","num":"429","diff":""},{"id":"prob_00771","num":"430","diff":""},{"id":"prob_00772","num":"431","diff":""},{"id":"prob_00773","num":"432","diff":""},{"id":"prob_00774","num":"433","diff":""},{"id":"prob_00775","num":"434","diff":""},{"id":"prob_00776","num":"435","diff":""},{"id":"prob_00777","num":"436","diff":""},{"id":"prob_00778","num":"437","diff":""},{"id":"prob_00779","num":"438","diff":""},{"id":"prob_00780","num":"439","diff":""},{"id":"prob_00781","num":"440","diff":""},{"id":"prob_00782","num":"441","diff":""},{"id":"prob_00783","num":"442","diff":""},{"id":"prob_00784","num":"443","diff":""},{"id":"prob_00785","num":"444","diff":""},{"id":"prob_00786","num":"445","diff":""},{"id":"prob_00787","num":"446","diff":""},{"id":"prob_00788","num":"447","diff":""},{"id":"prob_00789","num":"448","diff":""},{"id":"prob_00790","num":"449","diff":""},{"id":"prob_00791","num":"450","diff":""},{"id":"prob_00792","num":"451","diff":""},{"id":"prob_00796","num":"455","diff":""},{"id":"prob_00797","num":"456","diff":""},{"id":"prob_00798","num":"457","diff":""},{"id":"prob_00799","num":"458","diff":""},{"id":"prob_00800","num":"459","diff":""},{"id":"prob_00801","num":"460","diff":""},{"id":"prob_00802","num":"461","diff":""},{"id":"prob_00803","num":"462","diff":""},{"id":"prob_00804","num":"463","diff":""},{"id":"prob_00805","num":"464","diff":""},{"id":"prob_00806","num":"465","diff":""},{"id":"prob_00807","num":"466","diff":""},{"id":"prob_00808","num":"467","diff":""},{"id":"prob_00809","num":"468","diff":""},{"id":"prob_00810","num":"469","diff":""},{"id":"prob_00811","num":"470","diff":""},{"id":"prob_00830","num":"489","diff":""},{"id":"prob_00831","num":"490","diff":""},{"id":"prob_00832","num":"491","diff":""},{"id":"prob_00833","num":"492","diff":""},{"id":"prob_00834","num":"493","diff":""},{"id":"prob_00835","num":"494","diff":""},{"id":"prob_00836","num":"495","diff":""},{"id":"prob_00837","num":"496","diff":""},{"id":"prob_00838","num":"497","diff":""},{"id":"prob_00839","num":"498","diff":""},{"id":"prob_00840","num":"499","diff":""},{"id":"prob_00841","num":"500","diff":""},{"id":"prob_00842","num":"501","diff":""},{"id":"prob_00843","num":"502","diff":""},{"id":"prob_00844","num":"503","diff":""},{"id":"prob_00845","num":"504","diff":""},{"id":"prob_00846","num":"505","diff":""},{"id":"prob_00847","num":"506","diff":""},{"id":"prob_00848","num":"507","diff":""},{"id":"prob_00849","num":"508","diff":""},{"id":"prob_00850","num":"509","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"2. 삼각함수","unit2":"2. 삼각함수의 그래프","unit3":"3. 연습문제","problems":[{"id":"prob_00812","num":"471","diff":"1단계"},{"id":"prob_00813","num":"472","diff":"1단계"},{"id":"prob_00814","num":"473","diff":"1단계"},{"id":"prob_00815","num":"474","diff":"1단계"},{"id":"prob_00816","num":"475","diff":"1단계"},{"id":"prob_00817","num":"476","diff":"1단계"},{"id":"prob_00818","num":"477","diff":"2단계"},{"id":"prob_00819","num":"478","diff":"2단계"},{"id":"prob_00820","num":"479","diff":"2단계"},{"id":"prob_00821","num":"480","diff":"2단계"},{"id":"prob_00822","num":"481","diff":"2단계"},{"id":"prob_00823","num":"482","diff":"2단계"},{"id":"prob_00824","num":"483","diff":"2단계"},{"id":"prob_00825","num":"484","diff":"2단계"},{"id":"prob_00826","num":"485","diff":"3단계"},{"id":"prob_00827","num":"486","diff":"3단계"},{"id":"prob_00851","num":"510","diff":"1단계"},{"id":"prob_00852","num":"511","diff":"1단계"},{"id":"prob_00853","num":"512","diff":"1단계"},{"id":"prob_00854","num":"513","diff":"2단계"},{"id":"prob_00855","num":"514","diff":"2단계"},{"id":"prob_00856","num":"515","diff":"2단계"},{"id":"prob_00857","num":"516","diff":"2단계"},{"id":"prob_00858","num":"517","diff":"2단계"},{"id":"prob_00859","num":"518","diff":"2단계"},{"id":"prob_00860","num":"519","diff":"3단계"},{"id":"prob_00861","num":"520","diff":"3단계"},{"id":"prob_00862","num":"521","diff":"3단계"}]},{"subject":"대수","book":"개념루트","unit1":"2. 삼각함수","unit2":"3. 사인법칙과 코사인법칙","unit3":"1. 개념확인","problems":[{"id":"prob_00863","num":"522","diff":""},{"id":"prob_00880","num":"539","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"2. 삼각함수","unit2":"3. 사인법칙과 코사인법칙","unit3":"2. 유제","problems":[{"id":"prob_00864","num":"523","diff":""},{"id":"prob_00865","num":"524","diff":""},{"id":"prob_00866","num":"525","diff":""},{"id":"prob_00867","num":"526","diff":""},{"id":"prob_00868","num":"527","diff":""},{"id":"prob_00869","num":"528","diff":""},{"id":"prob_00870","num":"529","diff":""},{"id":"prob_00871","num":"530","diff":""},{"id":"prob_00872","num":"531","diff":""},{"id":"prob_00873","num":"532","diff":""},{"id":"prob_00874","num":"533","diff":""},{"id":"prob_00875","num":"534","diff":""},{"id":"prob_00876","num":"535","diff":""},{"id":"prob_00877","num":"536","diff":""},{"id":"prob_00878","num":"537","diff":""},{"id":"prob_00879","num":"538","diff":""},{"id":"prob_00881","num":"540","diff":""},{"id":"prob_00882","num":"541","diff":""},{"id":"prob_00883","num":"542","diff":""},{"id":"prob_00884","num":"543","diff":""},{"id":"prob_00885","num":"544","diff":""},{"id":"prob_00886","num":"545","diff":""},{"id":"prob_00887","num":"546","diff":""},{"id":"prob_00888","num":"547","diff":""},{"id":"prob_00889","num":"548","diff":""},{"id":"prob_00890","num":"549","diff":""},{"id":"prob_00891","num":"550","diff":""},{"id":"prob_00892","num":"551","diff":""},{"id":"prob_00909","num":"568","diff":""},{"id":"prob_00910","num":"569","diff":""},{"id":"prob_00911","num":"570","diff":""},{"id":"prob_00912","num":"571","diff":""},{"id":"prob_00913","num":"572","diff":""},{"id":"prob_00914","num":"573","diff":""},{"id":"prob_00915","num":"574","diff":""},{"id":"prob_00916","num":"575","diff":""},{"id":"prob_00917","num":"576","diff":""},{"id":"prob_00918","num":"577","diff":""},{"id":"prob_00919","num":"578","diff":""},{"id":"prob_00920","num":"579","diff":""},{"id":"prob_00921","num":"580","diff":""},{"id":"prob_00922","num":"581","diff":""},{"id":"prob_00923","num":"582","diff":""},{"id":"prob_00924","num":"583","diff":""},{"id":"prob_00925","num":"584","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"2. 삼각함수","unit2":"3. 사인법칙과 코사인법칙","unit3":"3. 연습문제","problems":[{"id":"prob_00893","num":"552","diff":"1단계"},{"id":"prob_00894","num":"553","diff":"1단계"},{"id":"prob_00895","num":"554","diff":"1단계"},{"id":"prob_00896","num":"555","diff":"2단계"},{"id":"prob_00897","num":"556","diff":"2단계"},{"id":"prob_00898","num":"557","diff":"2단계"},{"id":"prob_00899","num":"558","diff":"2단계"},{"id":"prob_00900","num":"559","diff":"2단계"},{"id":"prob_00901","num":"560","diff":"2단계"},{"id":"prob_00902","num":"561","diff":"2단계"},{"id":"prob_00903","num":"562","diff":"2단계"},{"id":"prob_00904","num":"563","diff":"2단계"},{"id":"prob_00905","num":"564","diff":"3단계"},{"id":"prob_00906","num":"565","diff":"3단계"},{"id":"prob_00907","num":"566","diff":"3단계"},{"id":"prob_00908","num":"567","diff":"3단계"},{"id":"prob_00926","num":"585","diff":"1단계"},{"id":"prob_00927","num":"586","diff":"1단계"},{"id":"prob_00928","num":"587","diff":"1단계"},{"id":"prob_00929","num":"588","diff":"2단계"},{"id":"prob_00930","num":"589","diff":"2단계"},{"id":"prob_00931","num":"590","diff":"2단계"},{"id":"prob_00932","num":"591","diff":"2단계"},{"id":"prob_00933","num":"592","diff":"2단계"},{"id":"prob_00934","num":"593","diff":"2단계"},{"id":"prob_00935","num":"594","diff":"3단계"},{"id":"prob_00936","num":"595","diff":"3단계"}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"1. 등차수열과 등비수열","unit3":"1. 개념확인","problems":[{"id":"prob_00937","num":"596","diff":""},{"id":"prob_00938","num":"597","diff":""},{"id":"prob_00939","num":"598","diff":""},{"id":"prob_00940","num":"599","diff":""},{"id":"prob_00962","num":"621","diff":""},{"id":"prob_00963","num":"622","diff":""},{"id":"prob_00964","num":"623","diff":""},{"id":"prob_00999","num":"658","diff":""},{"id":"prob_01000","num":"659","diff":""},{"id":"prob_01001","num":"660","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"1. 등차수열과 등비수열","unit3":"2. 유제","problems":[{"id":"prob_00941","num":"600","diff":""},{"id":"prob_00942","num":"601","diff":""},{"id":"prob_00943","num":"602","diff":""},{"id":"prob_00944","num":"603","diff":""},{"id":"prob_00945","num":"604","diff":""},{"id":"prob_00946","num":"605","diff":""},{"id":"prob_00947","num":"606","diff":""},{"id":"prob_00948","num":"607","diff":""},{"id":"prob_00949","num":"608","diff":""},{"id":"prob_00950","num":"609","diff":""},{"id":"prob_00951","num":"610","diff":""},{"id":"prob_00952","num":"611","diff":""},{"id":"prob_00953","num":"612","diff":""},{"id":"prob_00954","num":"613","diff":""},{"id":"prob_00955","num":"614","diff":""},{"id":"prob_00956","num":"615","diff":""},{"id":"prob_00957","num":"616","diff":""},{"id":"prob_00958","num":"617","diff":""},{"id":"prob_00959","num":"618","diff":""},{"id":"prob_00960","num":"619","diff":""},{"id":"prob_00961","num":"620","diff":""},{"id":"prob_00965","num":"624","diff":""},{"id":"prob_00966","num":"625","diff":""},{"id":"prob_00967","num":"626","diff":""},{"id":"prob_00968","num":"627","diff":""},{"id":"prob_00969","num":"628","diff":""},{"id":"prob_00970","num":"629","diff":""},{"id":"prob_00971","num":"630","diff":""},{"id":"prob_00972","num":"631","diff":""},{"id":"prob_00973","num":"632","diff":""},{"id":"prob_00974","num":"633","diff":""},{"id":"prob_00975","num":"634","diff":""},{"id":"prob_00976","num":"635","diff":""},{"id":"prob_00977","num":"636","diff":""},{"id":"prob_00978","num":"637","diff":""},{"id":"prob_00979","num":"638","diff":""},{"id":"prob_00980","num":"639","diff":""},{"id":"prob_01002","num":"661","diff":""},{"id":"prob_01003","num":"662","diff":""},{"id":"prob_01004","num":"663","diff":""},{"id":"prob_01005","num":"664","diff":""},{"id":"prob_01006","num":"665","diff":""},{"id":"prob_01007","num":"666","diff":""},{"id":"prob_01008","num":"667","diff":""},{"id":"prob_01009","num":"668","diff":""},{"id":"prob_01010","num":"669","diff":""},{"id":"prob_01011","num":"670","diff":""},{"id":"prob_01012","num":"671","diff":""},{"id":"prob_01013","num":"672","diff":""},{"id":"prob_01014","num":"673","diff":""},{"id":"prob_01015","num":"674","diff":""},{"id":"prob_01016","num":"675","diff":""},{"id":"prob_01017","num":"676","diff":""},{"id":"prob_01018","num":"677","diff":""},{"id":"prob_01019","num":"678","diff":""},{"id":"prob_01020","num":"679","diff":""},{"id":"prob_01021","num":"680","diff":""},{"id":"prob_01022","num":"681","diff":""},{"id":"prob_01023","num":"682","diff":""},{"id":"prob_01024","num":"683","diff":""},{"id":"prob_01025","num":"684","diff":""},{"id":"prob_01026","num":"685","diff":""},{"id":"prob_01027","num":"686","diff":""},{"id":"prob_01028","num":"687","diff":""},{"id":"prob_01029","num":"688","diff":""},{"id":"prob_01030","num":"689","diff":""},{"id":"prob_01031","num":"690","diff":""},{"id":"prob_01032","num":"691","diff":""},{"id":"prob_01033","num":"692","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"1. 등차수열과 등비수열","unit3":"3. 연습문제","problems":[{"id":"prob_00981","num":"640","diff":"1단계"},{"id":"prob_00982","num":"641","diff":"1단계"},{"id":"prob_00983","num":"642","diff":"1단계"},{"id":"prob_00984","num":"643","diff":"1단계"},{"id":"prob_00985","num":"644","diff":"1단계"},{"id":"prob_00986","num":"645","diff":"1단계"},{"id":"prob_00987","num":"646","diff":"2단계"},{"id":"prob_00988","num":"647","diff":"2단계"},{"id":"prob_00989","num":"648","diff":"2단계"},{"id":"prob_00990","num":"649","diff":"2단계"},{"id":"prob_00991","num":"650","diff":"2단계"},{"id":"prob_00992","num":"651","diff":"2단계"},{"id":"prob_00993","num":"652","diff":"2단계"},{"id":"prob_00994","num":"653","diff":"2단계"},{"id":"prob_00995","num":"654","diff":"3단계"},{"id":"prob_00996","num":"655","diff":"3단계"},{"id":"prob_00997","num":"656","diff":"3단계"},{"id":"prob_00998","num":"657","diff":"3단계"},{"id":"prob_01034","num":"693","diff":"1단계"},{"id":"prob_01035","num":"694","diff":"1단계"},{"id":"prob_01036","num":"695","diff":"1단계"},{"id":"prob_01037","num":"696","diff":"1단계"},{"id":"prob_01038","num":"697","diff":"1단계"},{"id":"prob_01039","num":"698","diff":"1단계"},{"id":"prob_01040","num":"699","diff":"2단계"},{"id":"prob_01041","num":"700","diff":"2단계"},{"id":"prob_01042","num":"701","diff":"2단계"},{"id":"prob_01043","num":"702","diff":"2단계"},{"id":"prob_01044","num":"703","diff":"2단계"},{"id":"prob_01045","num":"704","diff":"2단계"},{"id":"prob_01046","num":"705","diff":"2단계"},{"id":"prob_01047","num":"706","diff":"2단계"},{"id":"prob_01048","num":"707","diff":"3단계"},{"id":"prob_01049","num":"708","diff":"3단계"},{"id":"prob_01050","num":"709","diff":"3단계"}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"2. 수열의 합","unit3":"1. 개념확인","problems":[{"id":"prob_01051","num":"710","diff":""},{"id":"prob_01052","num":"711","diff":""},{"id":"prob_01053","num":"712","diff":""},{"id":"prob_01066","num":"725","diff":""},{"id":"prob_01067","num":"726","diff":""},{"id":"prob_01080","num":"739","diff":""},{"id":"prob_01081","num":"740","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"2. 수열의 합","unit3":"2. 유제","problems":[{"id":"prob_01054","num":"713","diff":""},{"id":"prob_01055","num":"714","diff":""},{"id":"prob_01056","num":"715","diff":""},{"id":"prob_01057","num":"716","diff":""},{"id":"prob_01058","num":"717","diff":""},{"id":"prob_01059","num":"718","diff":""},{"id":"prob_01060","num":"719","diff":""},{"id":"prob_01061","num":"720","diff":""},{"id":"prob_01062","num":"721","diff":""},{"id":"prob_01063","num":"722","diff":""},{"id":"prob_01064","num":"723","diff":""},{"id":"prob_01065","num":"724","diff":""},{"id":"prob_01068","num":"727","diff":""},{"id":"prob_01069","num":"728","diff":""},{"id":"prob_01070","num":"729","diff":""},{"id":"prob_01071","num":"730","diff":""},{"id":"prob_01072","num":"731","diff":""},{"id":"prob_01073","num":"732","diff":""},{"id":"prob_01074","num":"733","diff":""},{"id":"prob_01075","num":"734","diff":""},{"id":"prob_01076","num":"735","diff":""},{"id":"prob_01077","num":"736","diff":""},{"id":"prob_01078","num":"737","diff":""},{"id":"prob_01079","num":"738","diff":""},{"id":"prob_01082","num":"741","diff":""},{"id":"prob_01083","num":"742","diff":""},{"id":"prob_01084","num":"743","diff":""},{"id":"prob_01085","num":"744","diff":""},{"id":"prob_01086","num":"745","diff":""},{"id":"prob_01087","num":"746","diff":""},{"id":"prob_01088","num":"747","diff":""},{"id":"prob_01089","num":"748","diff":""},{"id":"prob_01090","num":"749","diff":""},{"id":"prob_01091","num":"750","diff":""},{"id":"prob_01092","num":"751","diff":""},{"id":"prob_01093","num":"752","diff":""},{"id":"prob_01094","num":"753","diff":""},{"id":"prob_01095","num":"754","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"2. 수열의 합","unit3":"3. 연습문제","problems":[{"id":"prob_01096","num":"755","diff":"1단계"},{"id":"prob_01097","num":"756","diff":"1단계"},{"id":"prob_01098","num":"757","diff":"1단계"},{"id":"prob_01099","num":"758","diff":"1단계"},{"id":"prob_01100","num":"759","diff":"1단계"},{"id":"prob_01101","num":"760","diff":"1단계"},{"id":"prob_01102","num":"761","diff":"1단계"},{"id":"prob_01103","num":"762","diff":"2단계"},{"id":"prob_01104","num":"763","diff":"2단계"},{"id":"prob_01105","num":"764","diff":"2단계"},{"id":"prob_01106","num":"765","diff":"2단계"},{"id":"prob_01107","num":"766","diff":"2단계"},{"id":"prob_01108","num":"767","diff":"2단계"},{"id":"prob_01109","num":"768","diff":"2단계"},{"id":"prob_01110","num":"769","diff":"2단계"},{"id":"prob_01111","num":"770","diff":"2단계"},{"id":"prob_01112","num":"771","diff":"3단계"},{"id":"prob_01113","num":"772","diff":"3단계"}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"3. 수학적 귀납법","unit3":"1. 개념확인","problems":[{"id":"prob_01114","num":"773","diff":""},{"id":"prob_01115","num":"774","diff":""},{"id":"prob_01116","num":"775","diff":""},{"id":"prob_01141","num":"800","diff":""},{"id":"prob_01142","num":"801","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"3. 수학적 귀납법","unit3":"2. 유제","problems":[{"id":"prob_01117","num":"776","diff":""},{"id":"prob_01118","num":"777","diff":""},{"id":"prob_01119","num":"778","diff":""},{"id":"prob_01120","num":"779","diff":""},{"id":"prob_01121","num":"780","diff":""},{"id":"prob_01122","num":"781","diff":""},{"id":"prob_01123","num":"782","diff":""},{"id":"prob_01124","num":"783","diff":""},{"id":"prob_01125","num":"784","diff":""},{"id":"prob_01126","num":"785","diff":""},{"id":"prob_01127","num":"786","diff":""},{"id":"prob_01128","num":"787","diff":""},{"id":"prob_01129","num":"788","diff":""},{"id":"prob_01130","num":"789","diff":""},{"id":"prob_01131","num":"790","diff":""},{"id":"prob_01132","num":"791","diff":""},{"id":"prob_01133","num":"792","diff":""},{"id":"prob_01134","num":"793","diff":""},{"id":"prob_01135","num":"794","diff":""},{"id":"prob_01136","num":"795","diff":""},{"id":"prob_01137","num":"796","diff":""},{"id":"prob_01138","num":"797","diff":""},{"id":"prob_01139","num":"798","diff":""},{"id":"prob_01140","num":"799","diff":""},{"id":"prob_01143","num":"802","diff":""},{"id":"prob_01144","num":"803","diff":""},{"id":"prob_01145","num":"804","diff":""},{"id":"prob_01146","num":"805","diff":""},{"id":"prob_01147","num":"806","diff":""},{"id":"prob_01148","num":"807","diff":""},{"id":"prob_01149","num":"808","diff":""}]},{"subject":"대수","book":"개념루트","unit1":"3. 수열","unit2":"3. 수학적 귀납법","unit3":"3. 연습문제","problems":[{"id":"prob_01150","num":"809","diff":"1단계"},{"id":"prob_01151","num":"810","diff":"1단계"},{"id":"prob_01152","num":"811","diff":"1단계"},{"id":"prob_01153","num":"812","diff":"1단계"},{"id":"prob_01154","num":"813","diff":"1단계"},{"id":"prob_01155","num":"814","diff":"1단계"},{"id":"prob_01156","num":"815","diff":"2단계"},{"id":"prob_01157","num":"816","diff":"2단계"},{"id":"prob_01158","num":"817","diff":"2단계"},{"id":"prob_01159","num":"818","diff":"2단계"},{"id":"prob_01160","num":"819","diff":"2단계"},{"id":"prob_01161","num":"820","diff":"2단계"},{"id":"prob_01162","num":"821","diff":"2단계"},{"id":"prob_01163","num":"822","diff":"3단계"},{"id":"prob_01164","num":"823","diff":"3단계"}]}],"totalCount":398,"createdAt":"2026-04-30T14:19:01.705Z"};
+var checkedIds = {};  // Set 대신 객체 사용 (구형 브라우저 호환)
+var checkedCount = 0;
+var COMMENT_PLACEHOLDER = '이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.';
+var groupItemRegistry = {};
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function showScreen(name) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  var target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+function updateCheckedCount() {
+  var el = document.getElementById('checkedCount');
+  if (el) el.textContent = checkedCount;
+}
+
+// ===== 이름 입력 =====
+function initNameScreen() {
+  var input = document.getElementById('nameInput');
+  var btn = document.getElementById('nameNextBtn');
+  if (!input || !btn) return;
+
+  if (DATA.studentName) {
+    input.value = DATA.studentName;
+    btn.disabled = false;
+  }
+
+  input.addEventListener('input', function() {
+    btn.disabled = input.value.trim().length === 0;
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !btn.disabled) btn.click();
+  });
+  btn.addEventListener('click', function() {
+    DATA.studentName = input.value.trim();
+    renderCheckScreen();
+    showScreen('check');
+  });
+}
+
+// ===== 의견 박스 =====
+function initCommentBox() {
+  var commentBox = document.getElementById('commentBox');
+  if (!commentBox) return;
+  commentBox.addEventListener('focus', function() {
+    if (commentBox.classList.contains('placeholder')) {
+      commentBox.value = '';
+      commentBox.classList.remove('placeholder');
+    }
+  });
+  commentBox.addEventListener('blur', function() {
+    if (commentBox.value.trim() === '') {
+      commentBox.value = COMMENT_PLACEHOLDER;
+      commentBox.classList.add('placeholder');
+    }
+  });
+}
+
+// ===== 체크 화면 렌더 =====
+function renderCheckScreen() {
+  var titleEl = document.getElementById('checkTitle');
+  if (titleEl) titleEl.textContent = DATA.studentName + ' 학생의 오답 체크';
+
+  var container = document.getElementById('groupsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  groupItemRegistry = {};
+
+  if (DATA.groups.length === 0) {
+    container.innerHTML = '<div style="background:#fef3e5;padding:20px;border-radius:8px;text-align:center;color:#8a5a1a;">문제가 없습니다.</div>';
+    return;
+  }
+
+  for (var gIdx = 0; gIdx < DATA.groups.length; gIdx++) {
+    buildGroupCard(container, DATA.groups[gIdx], gIdx);
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  var count = 0;
+  for (var id in checkedIds) { if (checkedIds[id]) count++; }
+  var el = document.getElementById('summaryCount');
+  if (el) el.textContent = count;
+  var el2 = document.getElementById('checkedCount');
+  if (el2) el2.textContent = count;
+}
+
+function collapseAllUnits() {
+  var groups = document.querySelectorAll('.group.collapsible');
+  for (var i = 0; i < groups.length; i++) {
+    groups[i].classList.remove('expanded');
+  }
+}
+
+function buildGroupCard(container, g, gIdx) {
+  var groupEl = document.createElement('div');
+  groupEl.className = 'group collapsible';  // 기본 접힘 상태
+
+  // 헤더
+  var unitParts = [];
+  if (g.unit1) unitParts.push(g.unit1);
+  if (g.unit2) unitParts.push(g.unit2);
+  if (g.unit3) unitParts.push(g.unit3);
+  var mainTitle = unitParts.length > 0 ? unitParts[unitParts.length - 1] : '(단원 미지정)';
+  var pathParts = unitParts.slice(0, -1);
+
+  var contentHtml = '';
+  if (g.subject || g.book) {
+    var sbParts = [];
+    if (g.subject) sbParts.push(g.subject);
+    if (g.book) sbParts.push(g.book);
+    contentHtml += '<div class="group-subject">' + escapeHtml(sbParts.join(' · ')) + '</div>';
+  }
+  contentHtml +=
+    '<div class="group-title">' + escapeHtml(mainTitle) +
+    '<span class="group-check-badge zero" data-badge-idx="' + gIdx + '">0</span>' +
+    '</div>';
+  if (pathParts.length > 0) {
+    contentHtml += '<div class="group-path">' + escapeHtml(pathParts.join(' › ')) + '</div>';
+  }
+
+  var headerEl = document.createElement('div');
+  headerEl.className = 'group-header';
+  headerEl.innerHTML =
+    '<div class="group-header-content">' + contentHtml + '</div>' +
+    '<label class="group-select-all" data-group-idx="' + gIdx + '">' +
+      '<input type="checkbox" class="group-all-cb">' +
+      '<span>모두</span>' +
+    '</label>' +
+    '<span class="group-expand-icon">▶</span>';
+  groupEl.appendChild(headerEl);
+
+  // 헤더 클릭 시 펼침/접힘 토글 (단, 전체선택 label/체크박스 클릭 시는 제외)
+  headerEl.addEventListener('click', function(e) {
+    // 전체선택 라벨/체크박스 영역 클릭이면 토글 무시
+    if (e.target.closest('.group-select-all')) return;
+    groupEl.classList.toggle('expanded');
+  });
+
+  var listEl = document.createElement('div');
+  listEl.className = 'problem-list';
+  var itemsInGroup = [];
+
+  for (var i = 0; i < g.problems.length; i++) {
+    (function(p) {
+      var item = document.createElement('label');
+      item.className = 'problem-item';
+      item.innerHTML =
+        '<input type="checkbox" data-id="' + escapeAttr(p.id) + '">' +
+        '<span class="problem-num">' + escapeHtml(p.num || '(번호없음)') + '</span>' +
+        (p.diff ? '<span class="problem-diff">' + escapeHtml(p.diff) + '</span>' : '');
+      var cb = item.querySelector('input');
+      cb.addEventListener('change', function() {
+        if (cb.checked) {
+          if (!checkedIds[p.id]) { checkedIds[p.id] = true; checkedCount++; }
+          item.classList.add('checked');
+        } else {
+          if (checkedIds[p.id]) { delete checkedIds[p.id]; checkedCount--; }
+          item.classList.remove('checked');
+        }
+        updateCheckedCount();
+        updateGroupAllState(gIdx);
+        updateGroupBadge(gIdx);
+        updateSummary();
+      });
+      listEl.appendChild(item);
+      itemsInGroup.push({ cb: cb, item: item, id: p.id });
+    })(g.problems[i]);
+  }
+  groupEl.appendChild(listEl);
+  container.appendChild(groupEl);
+
+  // 전체선택 핸들러
+  var groupAllLabel = headerEl.querySelector('.group-select-all');
+  var groupAllCb = headerEl.querySelector('.group-all-cb');
+  groupAllCb.addEventListener('change', function() {
+    var on = groupAllCb.checked;
+    for (var j = 0; j < itemsInGroup.length; j++) {
+      var it = itemsInGroup[j];
+      it.cb.checked = on;
+      if (on) {
+        if (!checkedIds[it.id]) { checkedIds[it.id] = true; checkedCount++; }
+        it.item.classList.add('checked');
+      } else {
+        if (checkedIds[it.id]) { delete checkedIds[it.id]; checkedCount--; }
+        it.item.classList.remove('checked');
+      }
+    }
+    groupAllLabel.classList.toggle('all-checked', on);
+    updateCheckedCount();
+    updateGroupBadge(gIdx);
+    updateSummary();
+  });
+  // 전체선택 라벨 클릭이 아코디언 토글과 충돌하지 않도록
+  groupAllLabel.addEventListener('click', function(e) { e.stopPropagation(); });
+
+  groupItemRegistry[gIdx] = {
+    itemsInGroup: itemsInGroup,
+    groupAllLabel: groupAllLabel,
+    groupAllCb: groupAllCb,
+    groupEl: groupEl
+  };
+}
+
+function updateGroupBadge(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var count = 0;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) count++;
+  }
+  var badge = reg.groupEl.querySelector('.group-check-badge');
+  if (badge) {
+    badge.textContent = count;
+    badge.classList.toggle('zero', count === 0);
+  }
+}
+
+function updateGroupAllState(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var allChecked = true;
+  var anyChecked = false;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) anyChecked = true;
+    else allChecked = false;
+  }
+  reg.groupAllCb.checked = allChecked;
+  try { reg.groupAllCb.indeterminate = !allChecked && anyChecked; } catch (e) {}
+  reg.groupAllLabel.classList.toggle('all-checked', allChecked);
+}
+
+// ===== 결과 파일 제출 =====
+function submitFile() {
+  var checkedIdList = Object.keys(checkedIds);
+  if (checkedIdList.length === 0) {
+    if (!confirm('체크한 문제가 없습니다. 그래도 제출하시겠습니까?')) return;
+  }
+  var commentBox = document.getElementById('commentBox');
+  var comment = commentBox.classList.contains('placeholder') ? '' : commentBox.value.trim();
+
+  var now = new Date();
+  var yyyy = now.getFullYear();
+  var mm = String(now.getMonth() + 1);
+  if (mm.length < 2) mm = '0' + mm;
+  var dd = String(now.getDate());
+  if (dd.length < 2) dd = '0' + dd;
+  var dateStr = yyyy + mm + dd;
+
+  var result = {
+    type: 'wrong-note-submission',
+    version: 1,
+    studentName: DATA.studentName,
+    suffix: DATA.suffix,
+    submittedAt: now.toISOString(),
+    originalCreatedAt: DATA.createdAt,
+    checkedIds: checkedIdList,
+    comment: comment
+  };
+
+  var safeName = (DATA.studentName || '학생').replace(/[\/\\:*?"<>|]/g, '_');
+  var safeSuffix = DATA.suffix ? '_' + DATA.suffix.replace(/[\/\\:*?"<>|]/g, '_') : '';
+  var filename = '오답제출_' + safeName + safeSuffix + '_' + dateStr + '.json';
+  var jsonText = JSON.stringify(result, null, 2);
+
+  // 모바일에서 Web Share API 시도
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  try {
+    if (isMobile && window.File && navigator.canShare) {
+      var file = new File([jsonText], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: '오답 제출 - ' + (DATA.studentName || ''),
+          text: filename
+        }).then(function() {
+          showToast('공유 완료!');
+        }).catch(function(err) {
+          if (err && err.name === 'AbortError') return;
+          fallbackDownload(jsonText, filename, isMobile);
+        });
+        return;
+      }
+    }
+  } catch (e) {}
+
+  fallbackDownload(jsonText, filename, isMobile);
+}
+
+function fallbackDownload(jsonText, filename, isMobile) {
+  try {
+    var blob = new Blob([jsonText], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    showToast(isMobile ? '다운로드 완료! 선생님께 보내주세요' : '파일이 다운로드되었습니다');
+  } catch (e) {
+    // 최후 폴백: 텍스트를 화면에 보여주고 복사하도록
+    var fallbackArea = document.createElement('div');
+    fallbackArea.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:white;padding:20px;overflow:auto;z-index:99999;';
+    fallbackArea.innerHTML =
+      '<h2 style="margin-top:0;">⚠️ 다운로드가 안 되는 환경입니다</h2>' +
+      '<p>아래 내용을 모두 선택해서 복사하고, 메모장에 붙여넣기 하여 ' + escapeHtml(filename) + ' 이름으로 저장해주세요.</p>' +
+      '<button onclick="this.parentElement.remove()" style="margin-bottom:10px;">닫기</button>' +
+      '<textarea readonly style="width:100%;height:60vh;font-family:monospace;font-size:11px;">' +
+      escapeHtml(jsonText) + '</textarea>';
+    document.body.appendChild(fallbackArea);
+  }
+}
+
+// ===== 초기화 (DOMContentLoaded 대신 즉시 실행) =====
+function init() {
+  try {
+    initNameScreen();
+    initCommentBox();
+    showScreen('name');
+  } catch (e) {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '⚠️ 초기화 오류: ' + e.message;
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
