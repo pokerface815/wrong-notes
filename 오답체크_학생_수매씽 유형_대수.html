@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>오답 체크 (수매씽 유형_대수)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    margin: 0;
+    background: #f5f3ee;
+    color: #2d2a24;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 30px 20px 100px;
+  }
+  h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .header-sub {
+    color: #8b8680;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  /* 이름 입력 화면 */
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .name-card {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    padding: 40px 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    text-align: center;
+    margin-top: 40px;
+  }
+  .name-card h2 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+  .name-card p {
+    color: #6b665e;
+    font-size: 13px;
+    margin: 0 0 24px;
+  }
+  .name-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1.5px solid #d9d4c8;
+    border-radius: 8px;
+    font-family: inherit;
+    text-align: center;
+    background: #faf8f3;
+  }
+  .name-input:focus {
+    outline: none;
+    border-color: #5d7a5b;
+    background: white;
+  }
+  .btn {
+    background: #5d7a5b;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 16px;
+    font-family: inherit;
+  }
+  .btn:hover { background: #4a6349; }
+  .btn:disabled { background: #bfbbb2; cursor: not-allowed; }
+  .btn.btn-lg { padding: 14px 32px; font-size: 15px; }
+  .btn.btn-danger { background: #b85c5c; }
+  .btn.btn-danger:hover { background: #9c4a4a; }
+
+  .btn-mini {
+    background: white;
+    color: #5d7a5b;
+    border: 1px solid #d9d4c8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-mini:hover { border-color: #5d7a5b; background: #faf8f3; }
+
+  /* 요약 바: 상단에 선택 개수 표시 */
+  .summary-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .summary-bar b { color: #3d5a3b; font-size: 16px; }
+
+  /* 아코디언 그룹 */
+  .group.collapsible .group-header {
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .group.collapsible .group-header:hover {
+    background: #f0ece0;
+  }
+  .group-expand-icon {
+    font-size: 14px;
+    color: #8b8680;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .group.expanded .group-expand-icon {
+    transform: rotate(90deg);
+  }
+  .group .problem-list {
+    display: grid;  /* 항상 표시 (트리 부모가 펼침 제어) */
+  }
+  .group.collapsible .problem-list {
+    display: none;  /* collapsible 클래스 있을 때만 접힘 (호환성) */
+  }
+  .group.collapsible.expanded .problem-list {
+    display: grid;
+  }
+  .group-check-badge {
+    display: inline-block;
+    background: #5d7a5b;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .group-check-badge.zero {
+    display: none;
+  }
+
+  /* ===== 단원 트리 (대단원/중단원/소단원) ===== */
+  .unit-node {
+    margin-bottom: 8px;
+  }
+  .unit-node.unit-level-1 {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .unit-node.unit-level-2,
+  .unit-node.unit-level-3 {
+    margin: 6px 12px 6px 12px;
+    border-radius: 8px;
+    background: #faf8f3;
+    border: 1px solid #e5e0d3;
+    overflow: hidden;
+  }
+  .unit-node.unit-level-3 {
+    background: #f4f1e8;
+  }
+  .unit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .unit-node.unit-level-1 .unit-header {
+    padding: 16px 18px;
+  }
+  .unit-node.unit-level-2 .unit-header {
+    padding: 10px 14px;
+  }
+  .unit-node.unit-level-3 .unit-header {
+    padding: 8px 12px;
+  }
+  .unit-header:hover {
+    background: rgba(0,0,0,0.03);
+  }
+  .unit-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .unit-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2a2520;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .unit-node.unit-level-2 .unit-title {
+    font-size: 14px;
+    color: #3a3530;
+  }
+  .unit-node.unit-level-3 .unit-title {
+    font-size: 13px;
+    color: #4a4540;
+    font-weight: 500;
+  }
+  .unit-expand-icon {
+    color: #9a958e;
+    font-size: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .unit-node.expanded > .unit-header .unit-expand-icon {
+    transform: rotate(90deg);
+  }
+  .unit-body {
+    display: none;
+    padding-bottom: 8px;
+  }
+  .unit-node.expanded > .unit-body {
+    display: block;
+  }
+  .unit-check-badge {
+    display: inline-block;
+    background: #5d7a5b;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+  }
+  .unit-check-badge.zero {
+    display: none;
+  }
+
+  /* 트리 안의 group은 들여쓰기 + 박스 약화 */
+  .unit-body .group {
+    margin: 4px 12px 8px 12px;
+    border: 1px dashed #d9d4c8;
+    background: #fff;
+  }
+  .unit-body .unit-body .group {
+    margin: 4px 8px 6px 8px;
+  }
+
+  /* 체크 화면 */
+  .group {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .group-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #ebe6db;
+    background: #faf8f3;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .group-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .group-select-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .group-select-all:hover { border-color: #5d7a5b; }
+  .group-select-all input {
+    margin: 0;
+    accent-color: #5d7a5b;
+  }
+  .group-select-all.all-checked {
+    background: #e8f0e5;
+    border-color: #5d7a5b;
+    color: #3d5a3b;
+  }
+  .group-subject {
+    font-size: 11px;
+    color: #8b8680;
+    margin-bottom: 2px;
+  }
+  .group-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .group-path {
+    font-size: 12px;
+    color: #6b665e;
+    margin-top: 2px;
+  }
+  .problem-list {
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .problem-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #faf8f3;
+    border: 1px solid #ebe6db;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 13px;
+    transition: all 0.1s;
+  }
+  .problem-item:hover { border-color: #bfbbb2; }
+  .problem-item.checked {
+    background: #e8f0e5;
+    border-color: #5d7a5b;
+    color: #3d5a3b;
+  }
+  .problem-item input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #5d7a5b;
+    flex-shrink: 0;
+  }
+  .problem-num {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .problem-diff {
+    font-size: 10px;
+    color: #8b8680;
+    flex-shrink: 0;
+  }
+
+  /* 하단 의견 + 제출 */
+  .bottom-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+  }
+  .comment-box {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    font-size: 13px;
+    border: 1px solid #d9d4c8;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    background: #faf8f3;
+    color: #2d2a24;
+  }
+  .comment-box.placeholder { color: #a8a39a; }
+  .comment-box:focus {
+    outline: none;
+    border-color: #5d7a5b;
+    background: white;
+  }
+
+  .submit-bar {
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .submit-info {
+    font-size: 13px;
+    color: #6b665e;
+  }
+  .submit-info b { color: #3d5a3b; font-size: 16px; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d2a24;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  /* 모바일 최적화 */
+  @media (max-width: 600px) {
+    .container { padding: 20px 14px 100px; }
+    h1 { font-size: 18px; }
+    .name-card { padding: 28px 20px; margin-top: 20px; }
+    .name-card h2 { font-size: 16px; }
+    .problem-list {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 6px;
+    }
+    .problem-item {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .problem-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    .group-header {
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .group-select-all {
+      align-self: flex-end;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .group-select-all input {
+      width: 18px;
+      height: 18px;
+    }
+    .submit-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .submit-bar .btn {
+      width: 100%;
+    }
+    .comment-box {
+      min-height: 120px;
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<noscript>
+<div style="background:#fef3e5;border:1px solid #f0c87a;color:#8a5a1a;padding:14px 18px;margin:20px;border-radius:8px;font-size:13px;line-height:1.6;">
+  ⚠️ <b>이 화면은 파일 미리보기예요.</b><br>
+  왼쪽 아래 <b>공유 버튼(⬆️)</b> → <b>"Safari에서 열기"</b> 또는 <b>"Chrome에서 열기"</b>를 눌러주세요.<br>
+  그래야 문제 체크 화면이 나타납니다.
+</div>
+</noscript>
+
+<div class="container">
+
+  <!-- 1단계: 이름 입력 -->
+  <div id="screen-name" class="screen">
+    <h1>오답 체크 제출</h1>
+    <div class="header-sub">수매씽 유형_대수 · 총 254문제</div>
+    <div class="name-card">
+      <h2>이름을 입력해주세요</h2>
+      <p>이름을 입력한 후 다음 단계로 넘어갈 수 있어요.</p>
+      <input type="text" id="nameInput" class="name-input" placeholder="이름" autocomplete="off">
+      <br>
+      <button id="nameNextBtn" class="btn btn-lg" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- 2단계: 문제 체크 (아코디언) -->
+  <div id="screen-check" class="screen">
+    <h1 id="checkTitle">오답 체크</h1>
+    <div class="header-sub" id="checkSubHeader">단원을 눌러서 펼친 후, 틀린 문제를 체크하세요</div>
+
+    <div id="summaryBar" class="summary-bar">
+      <div>선택된 문제 <b id="summaryCount">0</b>개</div>
+      <button class="btn-mini" onclick="collapseAllUnits()">모두 접기</button>
+    </div>
+
+    <div id="groupsContainer"></div>
+
+    <div class="bottom-section">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">선생님께 전하고 싶은 말</div>
+      <textarea id="commentBox" class="comment-box placeholder">이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.</textarea>
+
+      <div class="submit-bar">
+        <div class="submit-info">체크한 문제: <b id="checkedCount">0</b></div>
+        <button class="btn btn-lg" onclick="submitFile()">📤 결과 파일 다운로드</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- 오류 시 화면에 표시 (빈 화면 방지) -->
+<div id="errorBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#b85c5c;color:white;padding:12px 16px;font-size:12px;z-index:9999;line-height:1.5;"></div>
+
+<script>
+// 전역 에러 핸들러: 어떤 오류든 빈 화면 대신 메시지 표시
+window.addEventListener('error', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.innerHTML = '⚠️ 스크립트 오류: ' + (e.message || e.error || '알 수 없음') +
+        '<br><b>카카오톡 내장 브라우저에서 발생한 문제일 수 있어요.</b>' +
+        '<br>오른쪽 위 메뉴(⋯ 또는 ⋮)를 눌러서 <b>"다른 브라우저로 열기"</b>를 선택해주세요.';
+    }
+  } catch (ignore) {}
+});
+window.addEventListener('unhandledrejection', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '⚠️ 오류: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+    }
+  } catch (ignore) {}
+});
+
+var DATA = {"studentName":"","suffix":"수매씽 유형_대수","groups":[{"subject":"대수","book":"수매씽 유형","unit1":"2. 삼각함수","unit2":"06. 삼각함수의 그래프","unit3":"1. 기출 유형으로 실전 준비하기","problems":[{"id":"prob_01310","num":"1124","diff":"대표문제"},{"id":"prob_01311","num":"1125","diff":"Level 1"},{"id":"prob_01312","num":"1126","diff":"Level 1"},{"id":"prob_01313","num":"1127","diff":"Level 2"},{"id":"prob_01314","num":"1128","diff":"Level 2"},{"id":"prob_01315","num":"1129","diff":"대표문제"},{"id":"prob_01316","num":"1130","diff":"Level 1"},{"id":"prob_01317","num":"1131","diff":"Level 1"},{"id":"prob_01318","num":"1132","diff":"Level 2"},{"id":"prob_01319","num":"1133","diff":"Level 3"},{"id":"prob_01320","num":"1134","diff":"Level 3"},{"id":"prob_01321","num":"1135","diff":"대표문제"},{"id":"prob_01322","num":"1136","diff":"Level 2"},{"id":"prob_01323","num":"1137","diff":"Level 2"},{"id":"prob_01324","num":"1138","diff":"Level 3"},{"id":"prob_01325","num":"1139","diff":"Level 1"},{"id":"prob_01326","num":"1140","diff":"대표문제"},{"id":"prob_01327","num":"1141","diff":"Level 1"},{"id":"prob_01328","num":"1142","diff":"Level 1"},{"id":"prob_01329","num":"1143","diff":"Level 2"},{"id":"prob_01330","num":"1144","diff":"Level 2"},{"id":"prob_01331","num":"1145","diff":"Level 2"},{"id":"prob_01332","num":"1146","diff":"Level 2"},{"id":"prob_01333","num":"1147","diff":"Level 2"},{"id":"prob_01334","num":"1148","diff":"대표문제"},{"id":"prob_01335","num":"1149","diff":"Level 1"},{"id":"prob_01336","num":"1150","diff":"Level 1"},{"id":"prob_01337","num":"1151","diff":"Level 2"},{"id":"prob_01338","num":"1152","diff":"Level 2"},{"id":"prob_01339","num":"1153","diff":"Level 1"},{"id":"prob_01340","num":"1154","diff":"Level 2"},{"id":"prob_01341","num":"1155","diff":"대표문제"},{"id":"prob_01342","num":"1156","diff":"Level 1"},{"id":"prob_01343","num":"1157","diff":"Level 2"},{"id":"prob_01344","num":"1158","diff":"Level 2"},{"id":"prob_01345","num":"1159","diff":"Level 2"},{"id":"prob_01346","num":"1160","diff":"Level 3"},{"id":"prob_01347","num":"1161","diff":"대표문제"},{"id":"prob_01348","num":"1162","diff":"Level 1"},{"id":"prob_01349","num":"1163","diff":"Level 2"},{"id":"prob_01350","num":"1164","diff":"Level 2"},{"id":"prob_01351","num":"1165","diff":"Level 2"},{"id":"prob_01352","num":"1166","diff":"Level 2"},{"id":"prob_01353","num":"1167","diff":"Level 3"},{"id":"prob_01354","num":"1168","diff":"Level 3"},{"id":"prob_01355","num":"1169","diff":"Level 1"},{"id":"prob_01356","num":"1170","diff":"대표문제"},{"id":"prob_01357","num":"1171","diff":"Level 1"},{"id":"prob_01358","num":"1172","diff":"Level 2"},{"id":"prob_01359","num":"1173","diff":"Level 2"},{"id":"prob_01360","num":"1174","diff":"Level 2"},{"id":"prob_01361","num":"1175","diff":"Level 2"},{"id":"prob_01362","num":"1176","diff":"Level 2"},{"id":"prob_01363","num":"1177","diff":"Level 2"},{"id":"prob_01364","num":"1178","diff":"Level 2"},{"id":"prob_01365","num":"1179","diff":"대표문제"},{"id":"prob_01366","num":"1180","diff":"Level 1"},{"id":"prob_01367","num":"1181","diff":"Level 1"},{"id":"prob_01368","num":"1182","diff":"Level 2"},{"id":"prob_01369","num":"1183","diff":"Level 2"},{"id":"prob_01370","num":"1184","diff":"Level 2"},{"id":"prob_01371","num":"1185","diff":"Level 2"},{"id":"prob_01372","num":"1186","diff":"Level 2"},{"id":"prob_01373","num":"1187","diff":"Level 3"},{"id":"prob_01374","num":"1188","diff":"대표문제"},{"id":"prob_01375","num":"1189","diff":"Level 2"},{"id":"prob_01376","num":"1190","diff":"Level 2"},{"id":"prob_01377","num":"1191","diff":"Level 2"},{"id":"prob_01378","num":"1192","diff":"Level 2"},{"id":"prob_01379","num":"1193","diff":"Level 3"},{"id":"prob_01380","num":"1194","diff":"Level 3"},{"id":"prob_01381","num":"1195","diff":"대표문제"},{"id":"prob_01382","num":"1196","diff":"Level 1"},{"id":"prob_01383","num":"1197","diff":"Level 2"},{"id":"prob_01384","num":"1198","diff":"Level 2"},{"id":"prob_01385","num":"1199","diff":"Level 2"},{"id":"prob_01386","num":"1200","diff":"Level 2"},{"id":"prob_01387","num":"1201","diff":"Level 2"},{"id":"prob_01388","num":"1202","diff":"Level 2"},{"id":"prob_01389","num":"1203","diff":"Level 2"},{"id":"prob_01390","num":"1204","diff":"Level 2"},{"id":"prob_01391","num":"1205","diff":"Level 2"},{"id":"prob_01392","num":"1206","diff":"Level 2"},{"id":"prob_01393","num":"1207","diff":"Level 2"},{"id":"prob_01394","num":"1208","diff":"대표문제"},{"id":"prob_01395","num":"1209","diff":"Level 2"},{"id":"prob_01396","num":"1210","diff":"Level 2"},{"id":"prob_01397","num":"1211","diff":"Level 2"},{"id":"prob_01398","num":"1212","diff":"Level 3"},{"id":"prob_01399","num":"1213","diff":"대표문제"},{"id":"prob_01400","num":"1214","diff":"Level 2"},{"id":"prob_01401","num":"1215","diff":"Level 2"},{"id":"prob_01402","num":"1216","diff":"Level 2"},{"id":"prob_01403","num":"1217","diff":"Level 2"},{"id":"prob_01404","num":"1218","diff":"대표문제"},{"id":"prob_01405","num":"1219","diff":"Level 2"},{"id":"prob_01406","num":"1220","diff":"Level 2"},{"id":"prob_01407","num":"1221","diff":"Level 2"},{"id":"prob_01408","num":"1222","diff":"Level 2"},{"id":"prob_01409","num":"1223","diff":"Level 2"},{"id":"prob_01410","num":"1224","diff":"Level 3"},{"id":"prob_01411","num":"1225","diff":"Level 3"},{"id":"prob_01412","num":"1226","diff":"대표문제"},{"id":"prob_01413","num":"1227","diff":"Level 1"},{"id":"prob_01414","num":"1228","diff":"Level 2"},{"id":"prob_01415","num":"1229","diff":"Level 2"},{"id":"prob_01416","num":"1230","diff":"Level 2"},{"id":"prob_01417","num":"1231","diff":"Level 3"},{"id":"prob_01418","num":"1232","diff":"대표문제"},{"id":"prob_01419","num":"1233","diff":"Level 2"},{"id":"prob_01420","num":"1234","diff":"Level 3"},{"id":"prob_01421","num":"1235","diff":"Level 3"},{"id":"prob_01422","num":"1236","diff":"Level 2"},{"id":"prob_01423","num":"1237","diff":"Level 3"},{"id":"prob_01424","num":"1238","diff":"대표문제"},{"id":"prob_01425","num":"1239","diff":"Level 2"},{"id":"prob_01426","num":"1240","diff":"Level 2"},{"id":"prob_01427","num":"1241","diff":"Level 2"},{"id":"prob_01428","num":"1242","diff":"Level 2"},{"id":"prob_01429","num":"1243","diff":"Level 3"},{"id":"prob_01430","num":"1244","diff":"대표문제"},{"id":"prob_01431","num":"1245","diff":"Level 1"},{"id":"prob_01432","num":"1246","diff":"Level 1"},{"id":"prob_01433","num":"1247","diff":"Level 2"},{"id":"prob_01434","num":"1248","diff":"Level 2"},{"id":"prob_01435","num":"1249","diff":"Level 2"},{"id":"prob_01436","num":"1250","diff":"Level 2"},{"id":"prob_01437","num":"1251","diff":"Level 2"},{"id":"prob_01438","num":"1252","diff":"Level 1"},{"id":"prob_01439","num":"1253","diff":"Level 1"},{"id":"prob_01440","num":"1254","diff":"대표문제"},{"id":"prob_01441","num":"1255","diff":"Level 2"},{"id":"prob_01442","num":"1256","diff":"Level 2"},{"id":"prob_01443","num":"1257","diff":"Level 2"},{"id":"prob_01444","num":"1258","diff":"Level 2"},{"id":"prob_01445","num":"1259","diff":"Level 2"},{"id":"prob_01446","num":"1260","diff":"Level 3"},{"id":"prob_01447","num":"1261","diff":"Level 2"},{"id":"prob_01448","num":"1262","diff":"Level 2"},{"id":"prob_01449","num":"1263","diff":"대표문제"},{"id":"prob_01450","num":"1264","diff":"Level 2"},{"id":"prob_01451","num":"1265","diff":"Level 2"},{"id":"prob_01452","num":"1266","diff":"Level 2"},{"id":"prob_01453","num":"1267","diff":"Level 2"},{"id":"prob_01454","num":"1268","diff":"Level 2"},{"id":"prob_01455","num":"1269","diff":"대표문제"},{"id":"prob_01456","num":"1270","diff":"Level 2"},{"id":"prob_01457","num":"1271","diff":"Level 2"},{"id":"prob_01458","num":"1272","diff":"Level 2"},{"id":"prob_01459","num":"1273","diff":"Level 3"},{"id":"prob_01460","num":"1274","diff":"Level 3"},{"id":"prob_01461","num":"1275","diff":"Level 2"},{"id":"prob_01462","num":"1276","diff":"대표문제"},{"id":"prob_01463","num":"1277","diff":"Level 1"},{"id":"prob_01464","num":"1278","diff":"Level 2"},{"id":"prob_01465","num":"1279","diff":"Level 2"},{"id":"prob_01466","num":"1280","diff":"Level 3"},{"id":"prob_01467","num":"1281","diff":"Level 2"},{"id":"prob_01468","num":"1282","diff":"대표문제"},{"id":"prob_01469","num":"1283","diff":"Level 2"},{"id":"prob_01470","num":"1284","diff":"Level 2"},{"id":"prob_01471","num":"1285","diff":"Level 2"},{"id":"prob_01472","num":"1286","diff":"Level 2"},{"id":"prob_01473","num":"1287","diff":"Level 3"},{"id":"prob_01474","num":"1288","diff":"대표문제"},{"id":"prob_01475","num":"1289","diff":"Level 2"},{"id":"prob_01476","num":"1290","diff":"Level 2"},{"id":"prob_01477","num":"1291","diff":"Level 2"},{"id":"prob_01478","num":"1292","diff":"Level 2"},{"id":"prob_01479","num":"1293","diff":"Level 3"},{"id":"prob_01480","num":"1294","diff":"Level 3"},{"id":"prob_01481","num":"1295","diff":"Level 2"},{"id":"prob_01482","num":"1296","diff":"Level 3"},{"id":"prob_01483","num":"1297","diff":"대표문제"},{"id":"prob_01484","num":"1298","diff":"Level 2"},{"id":"prob_01485","num":"1299","diff":"Level 2"},{"id":"prob_01486","num":"1300","diff":"Level 2"},{"id":"prob_01487","num":"1301","diff":"Level 3"},{"id":"prob_01488","num":"1302","diff":"Level 2"},{"id":"prob_01489","num":"1303","diff":"대표문제"},{"id":"prob_01490","num":"1304","diff":"Level 1"},{"id":"prob_01491","num":"1305","diff":"Level 2"},{"id":"prob_01492","num":"1306","diff":"Level 2"},{"id":"prob_01493","num":"1307","diff":"Level 2"},{"id":"prob_01494","num":"1308","diff":"Level 2"},{"id":"prob_01495","num":"1309","diff":"Level 2"},{"id":"prob_01496","num":"1310","diff":"Level 2"}]},{"subject":"대수","book":"수매씽 유형","unit1":"2. 삼각함수","unit2":"06. 삼각함수의 그래프","unit3":"2. 서술형 유형 익히기","problems":[{"id":"prob_01497","num":"1311","diff":""},{"id":"prob_01498","num":"1312","diff":""},{"id":"prob_01499","num":"1313","diff":""},{"id":"prob_01500","num":"1314","diff":""},{"id":"prob_01501","num":"1315","diff":""},{"id":"prob_01502","num":"1316","diff":""},{"id":"prob_01503","num":"1317","diff":""},{"id":"prob_01504","num":"1318","diff":""},{"id":"prob_01505","num":"1319","diff":""},{"id":"prob_01506","num":"1320","diff":""}]},{"subject":"대수","book":"수매씽 유형","unit1":"2. 삼각함수","unit2":"06. 삼각함수의 그래프","unit3":"3. 실전 마무리하기 1회","problems":[{"id":"prob_01507","num":"1321","diff":""},{"id":"prob_01508","num":"1322","diff":""},{"id":"prob_01509","num":"1323","diff":""},{"id":"prob_01510","num":"1324","diff":""},{"id":"prob_01511","num":"1325","diff":""},{"id":"prob_01512","num":"1326","diff":""},{"id":"prob_01513","num":"1327","diff":""},{"id":"prob_01514","num":"1328","diff":""},{"id":"prob_01515","num":"1329","diff":""},{"id":"prob_01516","num":"1330","diff":""},{"id":"prob_01517","num":"1331","diff":""},{"id":"prob_01518","num":"1332","diff":""},{"id":"prob_01519","num":"1333","diff":""},{"id":"prob_01520","num":"1334","diff":""},{"id":"prob_01521","num":"1335","diff":""},{"id":"prob_01522","num":"1336","diff":""},{"id":"prob_01523","num":"1337","diff":""},{"id":"prob_01524","num":"1338","diff":""},{"id":"prob_01525","num":"1339","diff":""},{"id":"prob_01526","num":"1340","diff":""},{"id":"prob_01527","num":"1341","diff":""},{"id":"prob_01528","num":"1342","diff":""},{"id":"prob_01529","num":"1343","diff":""},{"id":"prob_01530","num":"1344","diff":""},{"id":"prob_01531","num":"1345","diff":""}]},{"subject":"대수","book":"수매씽 유형","unit1":"2. 삼각함수","unit2":"06. 삼각함수의 그래프","unit3":"4. 실전 마무리하기 2회","problems":[{"id":"prob_01532","num":"1346","diff":""},{"id":"prob_01533","num":"1347","diff":""},{"id":"prob_01534","num":"1348","diff":""},{"id":"prob_01535","num":"1349","diff":""},{"id":"prob_01536","num":"1350","diff":""},{"id":"prob_01537","num":"1351","diff":""},{"id":"prob_01538","num":"1352","diff":""},{"id":"prob_01539","num":"1353","diff":""},{"id":"prob_01540","num":"1354","diff":""},{"id":"prob_01541","num":"1355","diff":""},{"id":"prob_01542","num":"1356","diff":""},{"id":"prob_01543","num":"1357","diff":""},{"id":"prob_01544","num":"1358","diff":""},{"id":"prob_01545","num":"1359","diff":""},{"id":"prob_01546","num":"1360","diff":""},{"id":"prob_01547","num":"1361","diff":""},{"id":"prob_01548","num":"1362","diff":""},{"id":"prob_01549","num":"1363","diff":""},{"id":"prob_01550","num":"1364","diff":""},{"id":"prob_01551","num":"1365","diff":""},{"id":"prob_01552","num":"1366","diff":""},{"id":"prob_01553","num":"1367","diff":""},{"id":"prob_01554","num":"1368","diff":""},{"id":"prob_01555","num":"1369","diff":""},{"id":"prob_01556","num":"1370","diff":""}]},{"subject":"대수","book":"수매씽 유형","unit1":"2. 삼각함수","unit2":"06. 삼각함수의 그래프","unit3":"5. 고난도 Plus 문제","problems":[{"id":"prob_01557","num":"1371","diff":""},{"id":"prob_01558","num":"1372","diff":""},{"id":"prob_01559","num":"1373","diff":""},{"id":"prob_01560","num":"1374","diff":""},{"id":"prob_01561","num":"1375","diff":""},{"id":"prob_01562","num":"1376","diff":""}]},{"subject":"대수","book":"수매씽 유형","unit1":"2. 삼각함수","unit2":"07. 삼각함수의 활용","unit3":"1. 기출 유형으로 실전 준비하기","problems":[{"id":"prob_01563","num":"1377","diff":"대표문제"}]}],"totalCount":254,"createdAt":"2026-05-06T03:32:59.671Z"};
+var checkedIds = {};  // Set 대신 객체 사용 (구형 브라우저 호환)
+var checkedCount = 0;
+var COMMENT_PLACEHOLDER = '이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.';
+var groupItemRegistry = {};
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function showScreen(name) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  var target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+function updateCheckedCount() {
+  var el = document.getElementById('checkedCount');
+  if (el) el.textContent = checkedCount;
+}
+
+// ===== 이름 입력 =====
+function initNameScreen() {
+  var input = document.getElementById('nameInput');
+  var btn = document.getElementById('nameNextBtn');
+  if (!input || !btn) return;
+
+  if (DATA.studentName) {
+    input.value = DATA.studentName;
+    btn.disabled = false;
+  }
+
+  input.addEventListener('input', function() {
+    btn.disabled = input.value.trim().length === 0;
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !btn.disabled) btn.click();
+  });
+  btn.addEventListener('click', function() {
+    DATA.studentName = input.value.trim();
+    renderCheckScreen();
+    showScreen('check');
+  });
+}
+
+// ===== 의견 박스 =====
+function initCommentBox() {
+  var commentBox = document.getElementById('commentBox');
+  if (!commentBox) return;
+  commentBox.addEventListener('focus', function() {
+    if (commentBox.classList.contains('placeholder')) {
+      commentBox.value = '';
+      commentBox.classList.remove('placeholder');
+    }
+  });
+  commentBox.addEventListener('blur', function() {
+    if (commentBox.value.trim() === '') {
+      commentBox.value = COMMENT_PLACEHOLDER;
+      commentBox.classList.add('placeholder');
+    }
+  });
+}
+
+// ===== 체크 화면 렌더 =====
+function renderCheckScreen() {
+  var titleEl = document.getElementById('checkTitle');
+  if (titleEl) titleEl.textContent = DATA.studentName + ' 학생의 오답 체크';
+
+  var container = document.getElementById('groupsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  groupItemRegistry = {};
+  window.unitNodeRegistry = [];
+
+  if (DATA.groups.length === 0) {
+    container.innerHTML = '<div style="background:#fef3e5;padding:20px;border-radius:8px;text-align:center;color:#8a5a1a;">문제가 없습니다.</div>';
+    return;
+  }
+
+  // 그룹들을 단원 트리로 변환: unit1 → unit2 → unit3 → problems
+  var tree = buildUnitTree(DATA.groups);
+  // 트리를 화면에 렌더
+  renderUnitTree(container, tree, 1);
+  updateSummary();
+}
+
+// 평면 그룹 배열 → 단원 트리 구조
+function buildUnitTree(groups) {
+  // tree 구조: { name, level, children: [], groups: [] (terminal에서만) }
+  var roots = [];
+  var rootMap = {};
+
+  for (var gi = 0; gi < groups.length; gi++) {
+    var g = groups[gi];
+    var u1 = g.unit1 || '(단원 미지정)';
+    var u2 = g.unit2 || '';
+    var u3 = g.unit3 || '';
+
+    // 레벨1
+    if (!rootMap[u1]) {
+      var node1 = { name: u1, level: 1, children: [], childMap: {}, groupIndices: [] };
+      rootMap[u1] = node1;
+      roots.push(node1);
+    }
+    var n1 = rootMap[u1];
+
+    if (!u2) {
+      // 중단원 없음 → 대단원에 직접 그룹 매달기
+      n1.groupIndices.push(gi);
+      continue;
+    }
+
+    // 레벨2
+    if (!n1.childMap[u2]) {
+      var node2 = { name: u2, level: 2, children: [], childMap: {}, groupIndices: [] };
+      n1.childMap[u2] = node2;
+      n1.children.push(node2);
+    }
+    var n2 = n1.childMap[u2];
+
+    if (!u3) {
+      // 소단원 없음 → 중단원에 직접 그룹 매달기
+      n2.groupIndices.push(gi);
+      continue;
+    }
+
+    // 레벨3
+    if (!n2.childMap[u3]) {
+      var node3 = { name: u3, level: 3, children: [], childMap: {}, groupIndices: [] };
+      n2.childMap[u3] = node3;
+      n2.children.push(node3);
+    }
+    var n3 = n2.childMap[u3];
+    n3.groupIndices.push(gi);
+  }
+
+  return roots;
+}
+
+// 트리를 재귀적으로 렌더
+function renderUnitTree(container, nodes, level) {
+  for (var i = 0; i < nodes.length; i++) {
+    var node = nodes[i];
+    buildUnitNode(container, node);
+  }
+}
+
+// 한 단원 노드를 빌드 (재귀적으로 자식 포함)
+function buildUnitNode(container, node) {
+  var nodeEl = document.createElement('div');
+  nodeEl.className = 'unit-node unit-level-' + node.level + ' collapsible';
+  // 대단원은 기본적으로 펼친 상태로 (중단원 보임)
+  if (node.level === 1) {
+    nodeEl.classList.add('expanded');
+  }
+
+  // 헤더
+  var header = document.createElement('div');
+  header.className = 'unit-header';
+
+  // 헤더 클릭으로 펼침/접힘
+  var titleHtml =
+    '<div class="unit-title">' + escapeHtml(node.name) +
+    '<span class="unit-check-badge zero">0</span>' +
+    '</div>';
+  header.innerHTML =
+    '<div class="unit-header-content">' + titleHtml + '</div>' +
+    '<span class="unit-expand-icon">▶</span>';
+
+  nodeEl.appendChild(header);
+
+  // 자식 컨테이너
+  var body = document.createElement('div');
+  body.className = 'unit-body';
+  nodeEl.appendChild(body);
+
+  // 헤더 클릭 → 토글
+  header.addEventListener('click', function() {
+    nodeEl.classList.toggle('expanded');
+  });
+
+  // 자식 단원이 있으면 재귀
+  if (node.children.length > 0) {
+    renderUnitTree(body, node.children, node.level + 1);
+  }
+
+  // 직접 매달린 그룹들 (자식이 없는 단계의 단원)
+  for (var gi = 0; gi < node.groupIndices.length; gi++) {
+    var gIdx = node.groupIndices[gi];
+    var g = DATA.groups[gIdx];
+    buildGroupCard(body, g, gIdx);
+  }
+
+  // 배지 업데이트를 위해 노드 등록
+  if (!window.unitNodeRegistry) window.unitNodeRegistry = [];
+  window.unitNodeRegistry.push({ el: nodeEl, node: node });
+
+  container.appendChild(nodeEl);
+}
+
+function updateSummary() {
+  var count = 0;
+  for (var id in checkedIds) { if (checkedIds[id]) count++; }
+  var el = document.getElementById('summaryCount');
+  if (el) el.textContent = count;
+  var el2 = document.getElementById('checkedCount');
+  if (el2) el2.textContent = count;
+}
+
+function collapseAllUnits() {
+  // 트리 노드들 모두 접기
+  var unitNodes = document.querySelectorAll('.unit-node.collapsible');
+  for (var i = 0; i < unitNodes.length; i++) {
+    unitNodes[i].classList.remove('expanded');
+  }
+  // 호환성: 기존 구조의 .group.collapsible도 접기
+  var groups = document.querySelectorAll('.group.collapsible');
+  for (var j = 0; j < groups.length; j++) {
+    groups[j].classList.remove('expanded');
+  }
+}
+
+function buildGroupCard(container, g, gIdx) {
+  var groupEl = document.createElement('div');
+  groupEl.className = 'group';  // collapsible 제거 (이제 트리 부모가 펼침 처리)
+
+  // 헤더 (간단하게 - 과목·교재만 표시, 단원 정보는 부모에 있음)
+  var contentHtml = '';
+  var sbParts = [];
+  if (g.subject) sbParts.push(g.subject);
+  if (g.book) sbParts.push(g.book);
+  if (sbParts.length > 0) {
+    contentHtml += '<div class="group-subject">' + escapeHtml(sbParts.join(' · ')) + '</div>';
+  }
+  contentHtml +=
+    '<div class="group-title">문제 목록' +
+    '<span class="group-check-badge zero" data-badge-idx="' + gIdx + '">0</span>' +
+    '</div>';
+
+  var headerEl = document.createElement('div');
+  headerEl.className = 'group-header';
+  headerEl.innerHTML =
+    '<div class="group-header-content">' + contentHtml + '</div>' +
+    '<label class="group-select-all" data-group-idx="' + gIdx + '">' +
+      '<input type="checkbox" class="group-all-cb">' +
+      '<span>모두</span>' +
+    '</label>';
+  groupEl.appendChild(headerEl);
+
+  // 문제 목록 (항상 펼친 상태로)
+  var listEl = document.createElement('div');
+  listEl.className = 'problem-list';
+  var itemsInGroup = [];
+
+  for (var i = 0; i < g.problems.length; i++) {
+    (function(p) {
+      var item = document.createElement('label');
+      item.className = 'problem-item';
+      item.innerHTML =
+        '<input type="checkbox" data-id="' + escapeAttr(p.id) + '">' +
+        '<span class="problem-num">' + escapeHtml(p.num || '(번호없음)') + '</span>' +
+        (p.diff ? '<span class="problem-diff">' + escapeHtml(p.diff) + '</span>' : '');
+      var cb = item.querySelector('input');
+      cb.addEventListener('change', function() {
+        if (cb.checked) {
+          if (!checkedIds[p.id]) { checkedIds[p.id] = true; checkedCount++; }
+          item.classList.add('checked');
+        } else {
+          if (checkedIds[p.id]) { delete checkedIds[p.id]; checkedCount--; }
+          item.classList.remove('checked');
+        }
+        updateCheckedCount();
+        updateGroupAllState(gIdx);
+        updateGroupBadge(gIdx);
+        updateSummary();
+      });
+      listEl.appendChild(item);
+      itemsInGroup.push({ cb: cb, item: item, id: p.id });
+    })(g.problems[i]);
+  }
+  groupEl.appendChild(listEl);
+  container.appendChild(groupEl);
+
+  // 전체선택 핸들러
+  var groupAllLabel = headerEl.querySelector('.group-select-all');
+  var groupAllCb = headerEl.querySelector('.group-all-cb');
+  groupAllCb.addEventListener('change', function() {
+    var on = groupAllCb.checked;
+    for (var j = 0; j < itemsInGroup.length; j++) {
+      var it = itemsInGroup[j];
+      it.cb.checked = on;
+      if (on) {
+        if (!checkedIds[it.id]) { checkedIds[it.id] = true; checkedCount++; }
+        it.item.classList.add('checked');
+      } else {
+        if (checkedIds[it.id]) { delete checkedIds[it.id]; checkedCount--; }
+        it.item.classList.remove('checked');
+      }
+    }
+    groupAllLabel.classList.toggle('all-checked', on);
+    updateCheckedCount();
+    updateGroupBadge(gIdx);
+    updateSummary();
+  });
+  // 전체선택 라벨 클릭이 아코디언 토글과 충돌하지 않도록
+  groupAllLabel.addEventListener('click', function(e) { e.stopPropagation(); });
+
+  groupItemRegistry[gIdx] = {
+    itemsInGroup: itemsInGroup,
+    groupAllLabel: groupAllLabel,
+    groupAllCb: groupAllCb,
+    groupEl: groupEl
+  };
+}
+
+function updateGroupBadge(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var count = 0;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) count++;
+  }
+  var badge = reg.groupEl.querySelector('.group-check-badge');
+  if (badge) {
+    badge.textContent = count;
+    badge.classList.toggle('zero', count === 0);
+  }
+  // 부모 단원 노드들의 배지도 업데이트
+  updateAllUnitBadges();
+}
+
+// 모든 단원 노드의 합계 배지 갱신
+function updateAllUnitBadges() {
+  if (!window.unitNodeRegistry) return;
+  for (var i = 0; i < window.unitNodeRegistry.length; i++) {
+    var reg = window.unitNodeRegistry[i];
+    var total = countCheckedInUnit(reg.node);
+    var badge = reg.el.querySelector(':scope > .unit-header .unit-check-badge');
+    if (badge) {
+      badge.textContent = total;
+      badge.classList.toggle('zero', total === 0);
+    }
+  }
+}
+
+// 단원 노드에 속한 모든 체크 수 합산 (재귀)
+function countCheckedInUnit(node) {
+  var sum = 0;
+  // 직접 매달린 그룹들
+  for (var i = 0; i < node.groupIndices.length; i++) {
+    var gIdx = node.groupIndices[i];
+    var reg = groupItemRegistry[gIdx];
+    if (reg) {
+      for (var j = 0; j < reg.itemsInGroup.length; j++) {
+        if (reg.itemsInGroup[j].cb.checked) sum++;
+      }
+    }
+  }
+  // 자식 노드들
+  for (var k = 0; k < node.children.length; k++) {
+    sum += countCheckedInUnit(node.children[k]);
+  }
+  return sum;
+}
+
+function updateGroupAllState(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var allChecked = true;
+  var anyChecked = false;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) anyChecked = true;
+    else allChecked = false;
+  }
+  reg.groupAllCb.checked = allChecked;
+  try { reg.groupAllCb.indeterminate = !allChecked && anyChecked; } catch (e) {}
+  reg.groupAllLabel.classList.toggle('all-checked', allChecked);
+}
+
+// ===== 결과 파일 제출 =====
+function submitFile() {
+  var checkedIdList = Object.keys(checkedIds);
+  if (checkedIdList.length === 0) {
+    if (!confirm('체크한 문제가 없습니다. 그래도 제출하시겠습니까?')) return;
+  }
+  var commentBox = document.getElementById('commentBox');
+  var comment = commentBox.classList.contains('placeholder') ? '' : commentBox.value.trim();
+
+  var now = new Date();
+  var yyyy = now.getFullYear();
+  var mm = String(now.getMonth() + 1);
+  if (mm.length < 2) mm = '0' + mm;
+  var dd = String(now.getDate());
+  if (dd.length < 2) dd = '0' + dd;
+  var dateStr = yyyy + mm + dd;
+
+  var result = {
+    type: 'wrong-note-submission',
+    version: 1,
+    studentName: DATA.studentName,
+    suffix: DATA.suffix,
+    submittedAt: now.toISOString(),
+    originalCreatedAt: DATA.createdAt,
+    checkedIds: checkedIdList,
+    comment: comment
+  };
+
+  var safeName = (DATA.studentName || '학생').replace(/[\/\\:*?"<>|]/g, '_');
+  var safeSuffix = DATA.suffix ? '_' + DATA.suffix.replace(/[\/\\:*?"<>|]/g, '_') : '';
+  var filename = '오답제출_' + safeName + safeSuffix + '_' + dateStr + '.json';
+  var jsonText = JSON.stringify(result, null, 2);
+
+  // 모바일에서 Web Share API 시도
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  try {
+    if (isMobile && window.File && navigator.canShare) {
+      var file = new File([jsonText], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: '오답 제출 - ' + (DATA.studentName || ''),
+          text: filename
+        }).then(function() {
+          showToast('공유 완료!');
+        }).catch(function(err) {
+          if (err && err.name === 'AbortError') return;
+          fallbackDownload(jsonText, filename, isMobile);
+        });
+        return;
+      }
+    }
+  } catch (e) {}
+
+  fallbackDownload(jsonText, filename, isMobile);
+}
+
+function fallbackDownload(jsonText, filename, isMobile) {
+  try {
+    var blob = new Blob([jsonText], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    showToast(isMobile ? '다운로드 완료! 선생님께 보내주세요' : '파일이 다운로드되었습니다');
+  } catch (e) {
+    // 최후 폴백: 텍스트를 화면에 보여주고 복사하도록
+    var fallbackArea = document.createElement('div');
+    fallbackArea.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:white;padding:20px;overflow:auto;z-index:99999;';
+    fallbackArea.innerHTML =
+      '<h2 style="margin-top:0;">⚠️ 다운로드가 안 되는 환경입니다</h2>' +
+      '<p>아래 내용을 모두 선택해서 복사하고, 메모장에 붙여넣기 하여 ' + escapeHtml(filename) + ' 이름으로 저장해주세요.</p>' +
+      '<button onclick="this.parentElement.remove()" style="margin-bottom:10px;">닫기</button>' +
+      '<textarea readonly style="width:100%;height:60vh;font-family:monospace;font-size:11px;">' +
+      escapeHtml(jsonText) + '</textarea>';
+    document.body.appendChild(fallbackArea);
+  }
+}
+
+// ===== 초기화 (DOMContentLoaded 대신 즉시 실행) =====
+function init() {
+  try {
+    initNameScreen();
+    initCommentBox();
+    showScreen('name');
+  } catch (e) {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '⚠️ 초기화 오류: ' + e.message;
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
