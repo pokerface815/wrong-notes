@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>오답 체크 - 교재 선택</title>
+<title>오답 체크 - 과목 선택</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -30,67 +30,219 @@
     margin-bottom: 30px;
     text-align: center;
   }
-  .subject-section {
-    margin-bottom: 28px;
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 16px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 6px;
+    color: #5d7a5b;
+    text-decoration: none;
+    font-size: 13px;
+    cursor: pointer;
   }
-  .subject-title {
+  .back-btn:hover { background: #faf8f3; }
+  .current-subject {
     font-family: 'Noto Serif KR', serif;
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 600;
     color: #5d7a5b;
-    margin: 0 0 10px 4px;
-    padding-bottom: 6px;
+    margin: 8px 0 16px;
+    padding-bottom: 8px;
     border-bottom: 2px solid #5d7a5b;
   }
-  .book-list {
-    display: flex;
-    flex-direction: column;
+  .card-list {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 8px;
   }
-  .book-card {
+  @media (min-width: 480px) {
+    .card-list.subjects { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 720px) {
+    .card-list.subjects { grid-template-columns: repeat(3, 1fr); }
+  }
+  .card-item {
     background: white;
     border: 1px solid #d9d4c8;
     border-radius: 10px;
-    padding: 16px 20px;
+    padding: 18px 20px;
     text-decoration: none;
     color: inherit;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     transition: all 0.15s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    cursor: pointer;
   }
-  .book-card:hover, .book-card:active {
+  .card-item:hover, .card-item:active {
     border-color: #5d7a5b;
     background: #faf8f3;
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   }
-  .book-title {
+  .card-name {
     font-size: 16px;
     font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .book-arrow {
+  .card-arrow {
     color: #5d7a5b;
     font-size: 20px;
     font-weight: 600;
     flex-shrink: 0;
   }
+  .card-count {
+    font-size: 12px;
+    color: #8b8680;
+    background: #f5f3ee;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
+    margin-right: 8px;
+  }
+  .empty-state {
+    text-align: center;
+    color: #8b8680;
+    padding: 40px 20px;
+  }
 
   @media (max-width: 600px) {
     .container { padding: 20px 14px 60px; }
     h1 { font-size: 20px; }
-    .book-card { padding: 14px 16px; }
-    .book-title { font-size: 15px; }
+    .card-item { padding: 14px 16px; }
+    .card-name { font-size: 15px; }
   }
 </style>
 </head>
 <body>
 <div class="container">
   <h1>📚 오답 체크</h1>
-  <div class="header-sub">교재를 선택하세요</div>
-  <section class="subject-section"><h2 class="subject-title">대수</h2><div class="book-list"><a class="book-card" href="오답체크_학생_마더텅_대수.html"><div class="book-title">마더텅</div><div class="book-arrow">→</div></a><a class="book-card" href="오답체크_학생_개념루트_대수.html"><div class="book-title">개념루트</div><div class="book-arrow">→</div></a><a class="book-card" href="오답체크_학생_자이스토리_대수.html"><div class="book-title">자이스토리</div><div class="book-arrow">→</div></a><a class="book-card" href="오답체크_학생_수매씽 유형_대수.html"><div class="book-title">수매씽 유형</div><div class="book-arrow">→</div></a></div></section><section class="subject-section"><h2 class="subject-title">미적분1</h2><div class="book-list"><a class="book-card" href="오답체크_학생_개념루트_미적분1.html"><div class="book-title">개념루트</div><div class="book-arrow">→</div></a></div></section>
+  <div class="header-sub" id="headerSub">과목을 선택하세요</div>
+  <div id="content"></div>
 </div>
+<script>
+const SUBJECTS_DATA = [{"subject":"대수","books":[{"name":"마더텅","filename":"오답체크_학생_마더텅_대수.html"},{"name":"개념루트","filename":"오답체크_학생_개념루트_대수.html"},{"name":"자이스토리","filename":"오답체크_학생_자이스토리_대수.html"},{"name":"수매씽 유형","filename":"오답체크_학생_수매씽 유형_대수.html"},{"name":"올림포스 유형편","filename":"오답체크_학생_올림포스 유형편_대수.html"}]},{"subject":"미적분1","books":[{"name":"개념루트","filename":"오답체크_학생_개념루트_미적분1.html"}]}];
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function showSubjects() {
+  document.getElementById('headerSub').textContent = '과목을 선택하세요';
+  let html = '<div class="card-list subjects">';
+  if (SUBJECTS_DATA.length === 0) {
+    html = '<div class="empty-state">등록된 과목이 없습니다.</div>';
+    document.getElementById('content').innerHTML = html;
+    return;
+  }
+  for (let i = 0; i < SUBJECTS_DATA.length; i++) {
+    const s = SUBJECTS_DATA[i];
+    html +=
+      '<div class="card-item" onclick="showBooks(' + i + ')">' +
+        '<div class="card-name">' + escapeHtml(s.subject) + '</div>' +
+        '<span class="card-count">' + s.books.length + '</span>' +
+        '<div class="card-arrow">→</div>' +
+      '</div>';
+  }
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+  // URL 해시 초기화
+  if (location.hash) {
+    history.replaceState(null, '', location.pathname);
+  }
+}
+
+function showBooks(subjectIdx) {
+  const s = SUBJECTS_DATA[subjectIdx];
+  if (!s) { showSubjects(); return; }
+  document.getElementById('headerSub').textContent = '교재를 선택하세요';
+  let html =
+    '<button class="back-btn" onclick="showSubjects()">← 과목 선택</button>' +
+    '<div class="current-subject">' + escapeHtml(s.subject) + '</div>' +
+    '<div class="card-list">';
+  if (s.books.length === 0) {
+    html += '<div class="empty-state">등록된 교재가 없습니다.</div>';
+  } else {
+    for (const book of s.books) {
+      html +=
+        '<a class="card-item" href="' + escapeHtml(book.filename) + '">' +
+          '<div class="card-name">' + escapeHtml(book.name) + '</div>' +
+          '<div class="card-arrow">→</div>' +
+        '</a>';
+    }
+  }
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+  // URL 해시 업데이트 (뒤로가기 지원)
+  history.pushState({ subjectIdx: subjectIdx }, '', '#' + encodeURIComponent(s.subject));
+  window.scrollTo(0, 0);
+}
+
+// 뒤로가기 처리
+window.addEventListener('popstate', function(e) {
+  if (e.state && typeof e.state.subjectIdx === 'number') {
+    const s = SUBJECTS_DATA[e.state.subjectIdx];
+    if (s) {
+      // popstate에서는 history.pushState 안 함
+      document.getElementById('headerSub').textContent = '교재를 선택하세요';
+      let html =
+        '<button class="back-btn" onclick="showSubjects()">← 과목 선택</button>' +
+        '<div class="current-subject">' + escapeHtml(s.subject) + '</div>' +
+        '<div class="card-list">';
+      for (const book of s.books) {
+        html +=
+          '<a class="card-item" href="' + escapeHtml(book.filename) + '">' +
+            '<div class="card-name">' + escapeHtml(book.name) + '</div>' +
+            '<div class="card-arrow">→</div>' +
+          '</a>';
+      }
+      html += '</div>';
+      document.getElementById('content').innerHTML = html;
+      window.scrollTo(0, 0);
+      return;
+    }
+  }
+  showSubjects();
+});
+
+// 초기 진입: URL 해시에 과목명이 있으면 그 과목 교재 페이지로
+function init() {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash) {
+    const idx = SUBJECTS_DATA.findIndex(s => s.subject === hash);
+    if (idx >= 0) {
+      // popstate처럼 처리 (history 추가 없이)
+      const s = SUBJECTS_DATA[idx];
+      document.getElementById('headerSub').textContent = '교재를 선택하세요';
+      let html =
+        '<button class="back-btn" onclick="showSubjects()">← 과목 선택</button>' +
+        '<div class="current-subject">' + escapeHtml(s.subject) + '</div>' +
+        '<div class="card-list">';
+      for (const book of s.books) {
+        html +=
+          '<a class="card-item" href="' + escapeHtml(book.filename) + '">' +
+            '<div class="card-name">' + escapeHtml(book.name) + '</div>' +
+            '<div class="card-arrow">→</div>' +
+          '</a>';
+      }
+      html += '</div>';
+      document.getElementById('content').innerHTML = html;
+      return;
+    }
+  }
+  showSubjects();
+}
+init();
+</script>
 </body>
 </html>
