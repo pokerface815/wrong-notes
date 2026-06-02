@@ -135,9 +135,12 @@
     transform: rotate(90deg);
   }
   .group .problem-list {
-    display: none;
+    display: grid;  /* 항상 표시 (트리 부모가 펼침 제어) */
   }
-  .group.expanded .problem-list {
+  .group.collapsible .problem-list {
+    display: none;  /* collapsible 클래스 있을 때만 접힘 (호환성) */
+  }
+  .group.collapsible.expanded .problem-list {
     display: grid;
   }
   .group-check-badge {
@@ -152,6 +155,111 @@
   }
   .group-check-badge.zero {
     display: none;
+  }
+
+  /* ===== 단원 트리 (대단원/중단원/소단원) ===== */
+  .unit-node {
+    margin-bottom: 8px;
+  }
+  .unit-node.unit-level-1 {
+    background: white;
+    border: 1px solid #d9d4c8;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .unit-node.unit-level-2,
+  .unit-node.unit-level-3 {
+    margin: 6px 12px 6px 12px;
+    border-radius: 8px;
+    background: #faf8f3;
+    border: 1px solid #e5e0d3;
+    overflow: hidden;
+  }
+  .unit-node.unit-level-3 {
+    background: #f4f1e8;
+  }
+  .unit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .unit-node.unit-level-1 .unit-header {
+    padding: 16px 18px;
+  }
+  .unit-node.unit-level-2 .unit-header {
+    padding: 10px 14px;
+  }
+  .unit-node.unit-level-3 .unit-header {
+    padding: 8px 12px;
+  }
+  .unit-header:hover {
+    background: rgba(0,0,0,0.03);
+  }
+  .unit-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .unit-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2a2520;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .unit-node.unit-level-2 .unit-title {
+    font-size: 14px;
+    color: #3a3530;
+  }
+  .unit-node.unit-level-3 .unit-title {
+    font-size: 13px;
+    color: #4a4540;
+    font-weight: 500;
+  }
+  .unit-expand-icon {
+    color: #9a958e;
+    font-size: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .unit-node.expanded > .unit-header .unit-expand-icon {
+    transform: rotate(90deg);
+  }
+  .unit-body {
+    display: none;
+    padding-bottom: 8px;
+  }
+  .unit-node.expanded > .unit-body {
+    display: block;
+  }
+  .unit-check-badge {
+    display: inline-block;
+    background: #5d7a5b;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+  }
+  .unit-check-badge.zero {
+    display: none;
+  }
+
+  /* 트리 안의 group은 들여쓰기 + 박스 약화 */
+  .unit-body .group {
+    margin: 4px 12px 8px 12px;
+    border: 1px dashed #d9d4c8;
+    background: #fff;
+  }
+  .unit-body .unit-body .group {
+    margin: 4px 8px 6px 8px;
   }
 
   /* 체크 화면 */
@@ -276,7 +384,7 @@
     background: #faf8f3;
     color: #2d2a24;
   }
-  .comment-box.placeholder { color: #a8a39a; font-style: italic; }
+  .comment-box.placeholder { color: #a8a39a; }
   .comment-box:focus {
     outline: none;
     border-color: #5d7a5b;
@@ -404,7 +512,7 @@
 
       <div class="submit-bar">
         <div class="submit-info">체크한 문제: <b id="checkedCount">0</b></div>
-        <button class="btn btn-lg" onclick="submitFile()">📤 결과 파일 다운로드</button>
+        <button class="btn btn-lg" onclick="submitFile()">📤 결과 파일 전송하기</button>
       </div>
     </div>
   </div>
@@ -439,7 +547,7 @@ window.addEventListener('unhandledrejection', function(e) {
   } catch (ignore) {}
 });
 
-var DATA = {"studentName":"","suffix":"개념루트_미적분1","groups":[{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"","problems":[{"id":"prob_00001","num":"1","diff":""},{"id":"prob_00002","num":"2","diff":""},{"id":"prob_00003","num":"3","diff":""},{"id":"prob_00004","num":"4","diff":""},{"id":"prob_00005","num":"5","diff":""},{"id":"prob_00006","num":"6","diff":""},{"id":"prob_00007","num":"7","diff":""},{"id":"prob_00008","num":"8","diff":""},{"id":"prob_00009","num":"9","diff":""},{"id":"prob_00010","num":"10","diff":""},{"id":"prob_00011","num":"11","diff":""},{"id":"prob_00012","num":"12","diff":""},{"id":"prob_00013","num":"13","diff":""},{"id":"prob_00014","num":"14","diff":""}]}],"totalCount":14,"createdAt":"2026-04-28T09:41:32.666Z"};
+var DATA = {"studentName":"","suffix":"개념루트_미적분1","groups":[{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"","problems":[{"id":"prob_00001","num":"1","diff":""},{"id":"prob_00002","num":"2","diff":""},{"id":"prob_00003","num":"3","diff":""},{"id":"prob_00004","num":"4","diff":""},{"id":"prob_00005","num":"5","diff":""},{"id":"prob_00006","num":"6","diff":""},{"id":"prob_00007","num":"7","diff":""},{"id":"prob_00008","num":"8","diff":""},{"id":"prob_00009","num":"9","diff":""},{"id":"prob_00010","num":"10","diff":""},{"id":"prob_00011","num":"11","diff":""},{"id":"prob_00012","num":"12","diff":""},{"id":"prob_00013","num":"13","diff":""},{"id":"prob_00014","num":"14","diff":""}]}],"totalCount":14,"createdAt":"2026-06-02T00:44:55.676Z"};
 var checkedIds = {};  // Set 대신 객체 사용 (구형 브라우저 호환)
 var checkedCount = 0;
 var COMMENT_PLACEHOLDER = '이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.';
@@ -478,6 +586,11 @@ function initNameScreen() {
   var btn = document.getElementById('nameNextBtn');
   if (!input || !btn) return;
 
+  // URL ?name= 파라미터가 있으면 자동 입력 + 이름 화면 건너뛰기
+  var urlName = '';
+  try { urlName = (new URLSearchParams(window.location.search).get('name') || '').trim(); } catch (e) {}
+  if (urlName && !DATA.studentName) DATA.studentName = urlName;
+
   if (DATA.studentName) {
     input.value = DATA.studentName;
     btn.disabled = false;
@@ -494,6 +607,13 @@ function initNameScreen() {
     renderCheckScreen();
     showScreen('check');
   });
+
+  // 이름이 URL로 들어왔으면 바로 체크 화면으로
+  if (urlName) {
+    DATA.studentName = urlName;
+    renderCheckScreen();
+    showScreen('check');
+  }
 }
 
 // ===== 의견 박스 =====
@@ -523,16 +643,132 @@ function renderCheckScreen() {
   if (!container) return;
   container.innerHTML = '';
   groupItemRegistry = {};
+  window.unitNodeRegistry = [];
 
   if (DATA.groups.length === 0) {
     container.innerHTML = '<div style="background:#fef3e5;padding:20px;border-radius:8px;text-align:center;color:#8a5a1a;">문제가 없습니다.</div>';
     return;
   }
 
-  for (var gIdx = 0; gIdx < DATA.groups.length; gIdx++) {
-    buildGroupCard(container, DATA.groups[gIdx], gIdx);
-  }
+  // 그룹들을 단원 트리로 변환: unit1 → unit2 → unit3 → problems
+  var tree = buildUnitTree(DATA.groups);
+  // 트리를 화면에 렌더
+  renderUnitTree(container, tree, 1);
   updateSummary();
+}
+
+// 평면 그룹 배열 → 단원 트리 구조
+function buildUnitTree(groups) {
+  // tree 구조: { name, level, children: [], groups: [] (terminal에서만) }
+  var roots = [];
+  var rootMap = {};
+
+  for (var gi = 0; gi < groups.length; gi++) {
+    var g = groups[gi];
+    var u1 = g.unit1 || '(단원 미지정)';
+    var u2 = g.unit2 || '';
+    var u3 = g.unit3 || '';
+
+    // 레벨1
+    if (!rootMap[u1]) {
+      var node1 = { name: u1, level: 1, children: [], childMap: {}, groupIndices: [] };
+      rootMap[u1] = node1;
+      roots.push(node1);
+    }
+    var n1 = rootMap[u1];
+
+    if (!u2) {
+      // 중단원 없음 → 대단원에 직접 그룹 매달기
+      n1.groupIndices.push(gi);
+      continue;
+    }
+
+    // 레벨2
+    if (!n1.childMap[u2]) {
+      var node2 = { name: u2, level: 2, children: [], childMap: {}, groupIndices: [] };
+      n1.childMap[u2] = node2;
+      n1.children.push(node2);
+    }
+    var n2 = n1.childMap[u2];
+
+    if (!u3) {
+      // 소단원 없음 → 중단원에 직접 그룹 매달기
+      n2.groupIndices.push(gi);
+      continue;
+    }
+
+    // 레벨3
+    if (!n2.childMap[u3]) {
+      var node3 = { name: u3, level: 3, children: [], childMap: {}, groupIndices: [] };
+      n2.childMap[u3] = node3;
+      n2.children.push(node3);
+    }
+    var n3 = n2.childMap[u3];
+    n3.groupIndices.push(gi);
+  }
+
+  return roots;
+}
+
+// 트리를 재귀적으로 렌더
+function renderUnitTree(container, nodes, level) {
+  for (var i = 0; i < nodes.length; i++) {
+    var node = nodes[i];
+    buildUnitNode(container, node);
+  }
+}
+
+// 한 단원 노드를 빌드 (재귀적으로 자식 포함)
+function buildUnitNode(container, node) {
+  var nodeEl = document.createElement('div');
+  nodeEl.className = 'unit-node unit-level-' + node.level + ' collapsible';
+  // 대단원은 기본적으로 펼친 상태로 (중단원 보임)
+  if (node.level === 1) {
+    nodeEl.classList.add('expanded');
+  }
+
+  // 헤더
+  var header = document.createElement('div');
+  header.className = 'unit-header';
+
+  // 헤더 클릭으로 펼침/접힘
+  var titleHtml =
+    '<div class="unit-title">' + escapeHtml(node.name) +
+    '<span class="unit-check-badge zero">0</span>' +
+    '</div>';
+  header.innerHTML =
+    '<div class="unit-header-content">' + titleHtml + '</div>' +
+    '<span class="unit-expand-icon">▶</span>';
+
+  nodeEl.appendChild(header);
+
+  // 자식 컨테이너
+  var body = document.createElement('div');
+  body.className = 'unit-body';
+  nodeEl.appendChild(body);
+
+  // 헤더 클릭 → 토글
+  header.addEventListener('click', function() {
+    nodeEl.classList.toggle('expanded');
+  });
+
+  // 자식 단원이 있으면 재귀
+  if (node.children.length > 0) {
+    renderUnitTree(body, node.children, node.level + 1);
+  }
+
+  // 직접 매달린 그룹들 (자식이 없는 단계의 단원)
+  for (var gi = 0; gi < node.groupIndices.length; gi++) {
+    var gIdx = node.groupIndices[gi];
+    var g = DATA.groups[gIdx];
+    buildGroupCard(body, g, gIdx);
+  }
+
+  // 배지 업데이트를 위해 노드 등록
+  if (!window.unitNodeRegistry) window.unitNodeRegistry = [];
+  window.unitNodeRegistry.push({ el: nodeEl, node: node });
+
+  container.appendChild(nodeEl);
 }
 
 function updateSummary() {
@@ -545,38 +781,34 @@ function updateSummary() {
 }
 
 function collapseAllUnits() {
+  // 트리 노드들 모두 접기
+  var unitNodes = document.querySelectorAll('.unit-node.collapsible');
+  for (var i = 0; i < unitNodes.length; i++) {
+    unitNodes[i].classList.remove('expanded');
+  }
+  // 호환성: 기존 구조의 .group.collapsible도 접기
   var groups = document.querySelectorAll('.group.collapsible');
-  for (var i = 0; i < groups.length; i++) {
-    groups[i].classList.remove('expanded');
+  for (var j = 0; j < groups.length; j++) {
+    groups[j].classList.remove('expanded');
   }
 }
 
 function buildGroupCard(container, g, gIdx) {
   var groupEl = document.createElement('div');
-  groupEl.className = 'group collapsible';  // 기본 접힘 상태
+  groupEl.className = 'group';  // collapsible 제거 (이제 트리 부모가 펼침 처리)
 
-  // 헤더
-  var unitParts = [];
-  if (g.unit1) unitParts.push(g.unit1);
-  if (g.unit2) unitParts.push(g.unit2);
-  if (g.unit3) unitParts.push(g.unit3);
-  var mainTitle = unitParts.length > 0 ? unitParts[unitParts.length - 1] : '(단원 미지정)';
-  var pathParts = unitParts.slice(0, -1);
-
+  // 헤더 (간단하게 - 과목·교재만 표시, 단원 정보는 부모에 있음)
   var contentHtml = '';
-  if (g.subject || g.book) {
-    var sbParts = [];
-    if (g.subject) sbParts.push(g.subject);
-    if (g.book) sbParts.push(g.book);
+  var sbParts = [];
+  if (g.subject) sbParts.push(g.subject);
+  if (g.book) sbParts.push(g.book);
+  if (sbParts.length > 0) {
     contentHtml += '<div class="group-subject">' + escapeHtml(sbParts.join(' · ')) + '</div>';
   }
   contentHtml +=
-    '<div class="group-title">' + escapeHtml(mainTitle) +
+    '<div class="group-title">문제 목록' +
     '<span class="group-check-badge zero" data-badge-idx="' + gIdx + '">0</span>' +
     '</div>';
-  if (pathParts.length > 0) {
-    contentHtml += '<div class="group-path">' + escapeHtml(pathParts.join(' › ')) + '</div>';
-  }
 
   var headerEl = document.createElement('div');
   headerEl.className = 'group-header';
@@ -585,17 +817,10 @@ function buildGroupCard(container, g, gIdx) {
     '<label class="group-select-all" data-group-idx="' + gIdx + '">' +
       '<input type="checkbox" class="group-all-cb">' +
       '<span>모두</span>' +
-    '</label>' +
-    '<span class="group-expand-icon">▶</span>';
+    '</label>';
   groupEl.appendChild(headerEl);
 
-  // 헤더 클릭 시 펼침/접힘 토글 (단, 전체선택 label/체크박스 클릭 시는 제외)
-  headerEl.addEventListener('click', function(e) {
-    // 전체선택 라벨/체크박스 영역 클릭이면 토글 무시
-    if (e.target.closest('.group-select-all')) return;
-    groupEl.classList.toggle('expanded');
-  });
-
+  // 문제 목록 (항상 펼친 상태로)
   var listEl = document.createElement('div');
   listEl.className = 'problem-list';
   var itemsInGroup = [];
@@ -673,6 +898,42 @@ function updateGroupBadge(gIdx) {
     badge.textContent = count;
     badge.classList.toggle('zero', count === 0);
   }
+  // 부모 단원 노드들의 배지도 업데이트
+  updateAllUnitBadges();
+}
+
+// 모든 단원 노드의 합계 배지 갱신
+function updateAllUnitBadges() {
+  if (!window.unitNodeRegistry) return;
+  for (var i = 0; i < window.unitNodeRegistry.length; i++) {
+    var reg = window.unitNodeRegistry[i];
+    var total = countCheckedInUnit(reg.node);
+    var badge = reg.el.querySelector(':scope > .unit-header .unit-check-badge');
+    if (badge) {
+      badge.textContent = total;
+      badge.classList.toggle('zero', total === 0);
+    }
+  }
+}
+
+// 단원 노드에 속한 모든 체크 수 합산 (재귀)
+function countCheckedInUnit(node) {
+  var sum = 0;
+  // 직접 매달린 그룹들
+  for (var i = 0; i < node.groupIndices.length; i++) {
+    var gIdx = node.groupIndices[i];
+    var reg = groupItemRegistry[gIdx];
+    if (reg) {
+      for (var j = 0; j < reg.itemsInGroup.length; j++) {
+        if (reg.itemsInGroup[j].cb.checked) sum++;
+      }
+    }
+  }
+  // 자식 노드들
+  for (var k = 0; k < node.children.length; k++) {
+    sum += countCheckedInUnit(node.children[k]);
+  }
+  return sum;
 }
 
 function updateGroupAllState(gIdx) {
@@ -698,6 +959,36 @@ function submitFile() {
   var commentBox = document.getElementById('commentBox');
   var comment = commentBox.classList.contains('placeholder') ? '' : commentBox.value.trim();
 
+  // 체크된 문제들의 단원 자동 추출 (선생님 참고용)
+  var checkedUnitsSet = {};  // key → 객체
+  for (var ci = 0; ci < checkedIdList.length; ci++) {
+    var pid = checkedIdList[ci];
+    // DATA.groups 에서 해당 problem을 찾음
+    for (var gi = 0; gi < DATA.groups.length; gi++) {
+      var g = DATA.groups[gi];
+      var found = false;
+      for (var pi = 0; pi < g.problems.length; pi++) {
+        if (String(g.problems[pi].id) === String(pid)) {
+          var unitKey = (g.unit1 || '') + '|' + (g.unit2 || '') + '|' + (g.unit3 || '');
+          if (!checkedUnitsSet[unitKey]) {
+            checkedUnitsSet[unitKey] = {
+              unit1: g.unit1 || '',
+              unit2: g.unit2 || '',
+              unit3: g.unit3 || '',
+              count: 0
+            };
+          }
+          checkedUnitsSet[unitKey].count++;
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+  }
+  var checkedUnits = [];
+  for (var k in checkedUnitsSet) checkedUnits.push(checkedUnitsSet[k]);
+
   var now = new Date();
   var yyyy = now.getFullYear();
   var mm = String(now.getMonth() + 1);
@@ -708,13 +999,14 @@ function submitFile() {
 
   var result = {
     type: 'wrong-note-submission',
-    version: 1,
+    version: 2,
     studentName: DATA.studentName,
     suffix: DATA.suffix,
     submittedAt: now.toISOString(),
     originalCreatedAt: DATA.createdAt,
     checkedIds: checkedIdList,
-    comment: comment
+    comment: comment,
+    checkedUnits: checkedUnits
   };
 
   var safeName = (DATA.studentName || '학생').replace(/[\/\\:*?"<>|]/g, '_');
@@ -747,6 +1039,52 @@ function submitFile() {
   fallbackDownload(jsonText, filename, isMobile);
 }
 
+function showSendGuide(filename, isMobile) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:16px;max-width:420px;width:100%;padding:24px;';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:20px;font-weight:700;margin-bottom:6px;';
+  title.textContent = '✅ 결과 파일이 저장됐어요!';
+
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:14px;color:#555;margin-bottom:16px;';
+  sub.textContent = '이제 선생님께 보내기만 하면 끝이에요.';
+
+  var ol = document.createElement('ol');
+  ol.style.cssText = 'margin:0 0 18px;padding-left:22px;line-height:1.9;font-size:15px;';
+  var steps = isMobile
+    ? ['파일이 저장됐어요.', '저장된 파일을 카카오톡으로 선생님께 전송해주세요. ("파일" 앱에서 방금 받은 파일을 찾아 공유 → 카카오톡)']
+    : ['방금 다운로드 폴더에 파일이 저장됐어요. (파일명: ' + filename + ')', '이 파일을 카카오톡으로 선생님께 전송해주세요. (카톡 대화창에 끌어다 놓거나, 첨부 📎 → 파일 선택)'];
+  for (var i = 0; i < steps.length; i++) {
+    var li = document.createElement('li');
+    li.textContent = steps[i];
+    ol.appendChild(li);
+  }
+
+  var tip = document.createElement('div');
+  tip.style.cssText = 'background:#f6f2fb;border-radius:10px;padding:12px 14px;font-size:13px;color:#555;margin-bottom:16px;';
+  tip.textContent = '💡 파일을 못 찾겠으면, 카톡으로 "선생님 파일 어떻게 보내요?"라고 물어보세요!';
+
+  var btn = document.createElement('button');
+  btn.style.cssText = 'width:100%;padding:13px;border:none;border-radius:10px;background:#7c5cbf;color:#fff;font-size:15px;font-weight:600;cursor:pointer;';
+  btn.textContent = '확인했어요';
+  btn.onclick = function() { overlay.remove(); };
+
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(ol);
+  box.appendChild(tip);
+  box.appendChild(btn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
 function fallbackDownload(jsonText, filename, isMobile) {
   try {
     var blob = new Blob([jsonText], { type: 'application/json' });
@@ -758,7 +1096,7 @@ function fallbackDownload(jsonText, filename, isMobile) {
     a.click();
     document.body.removeChild(a);
     setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
-    showToast(isMobile ? '다운로드 완료! 선생님께 보내주세요' : '파일이 다운로드되었습니다');
+    showSendGuide(filename, isMobile);
   } catch (e) {
     // 최후 폴백: 텍스트를 화면에 보여주고 복사하도록
     var fallbackArea = document.createElement('div');
