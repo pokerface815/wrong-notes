@@ -11,8 +11,8 @@
   body {
     font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
     margin: 0;
-    background: #f5f3ee;
-    color: #2d2a24;
+    background: #f5f7f9;
+    color: #1c2530;
     line-height: 1.5;
   }
   .container {
@@ -21,12 +21,13 @@
     padding: 30px 20px 100px;
   }
   h1 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 22px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 21px;
     margin: 0 0 4px;
   }
   .header-sub {
-    color: #8b8680;
+    color: #8b98a5;
     font-size: 13px;
     margin-bottom: 24px;
   }
@@ -36,7 +37,7 @@
   .screen.active { display: block; }
   .name-card {
     background: white;
-    border: 1px solid #d9d4c8;
+    border: 1px solid #d7dee3;
     border-radius: 10px;
     padding: 40px 32px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -44,12 +45,13 @@
     margin-top: 40px;
   }
   .name-card h2 {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 18px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
     margin: 0 0 8px;
   }
   .name-card p {
-    color: #6b665e;
+    color: #4d5a65;
     font-size: 13px;
     margin: 0 0 24px;
   }
@@ -57,19 +59,19 @@
     width: 100%;
     padding: 12px 14px;
     font-size: 16px;
-    border: 1.5px solid #d9d4c8;
+    border: 1.5px solid #d7dee3;
     border-radius: 8px;
     font-family: inherit;
     text-align: center;
-    background: #faf8f3;
+    background: #eef1f4;
   }
   .name-input:focus {
     outline: none;
-    border-color: #5d7a5b;
+    border-color: #2f4f6b;
     background: white;
   }
   .btn {
-    background: #5d7a5b;
+    background: #2f4f6b;
     color: white;
     border: none;
     padding: 10px 24px;
@@ -80,23 +82,23 @@
     margin-top: 16px;
     font-family: inherit;
   }
-  .btn:hover { background: #4a6349; }
-  .btn:disabled { background: #bfbbb2; cursor: not-allowed; }
+  .btn:hover { background: #223a51; }
+  .btn:disabled { background: #b8c0c7; cursor: not-allowed; }
   .btn.btn-lg { padding: 14px 32px; font-size: 15px; }
-  .btn.btn-danger { background: #b85c5c; }
-  .btn.btn-danger:hover { background: #9c4a4a; }
+  .btn.btn-danger { background: var(--danger); }
+  .btn.btn-danger:hover { background: var(--danger-dark); }
 
   .btn-mini {
     background: white;
-    color: #5d7a5b;
-    border: 1px solid #d9d4c8;
+    color: #2f4f6b;
+    border: 1px solid #d7dee3;
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
     font-family: inherit;
   }
-  .btn-mini:hover { border-color: #5d7a5b; background: #faf8f3; }
+  .btn-mini:hover { border-color: #2f4f6b; background: #eef1f4; }
 
   /* 요약 바: 상단에 선택 개수 표시 */
   .summary-bar {
@@ -104,7 +106,7 @@
     top: 0;
     z-index: 50;
     background: white;
-    border: 1px solid #d9d4c8;
+    border: 1px solid #d7dee3;
     border-radius: 10px;
     padding: 12px 16px;
     margin-bottom: 14px;
@@ -114,7 +116,7 @@
     font-size: 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
-  .summary-bar b { color: #3d5a3b; font-size: 16px; }
+  .summary-bar b { color: #223a51; font-size: 16px; }
 
   /* 아코디언 그룹 */
   .group.collapsible .group-header {
@@ -122,11 +124,11 @@
     transition: background 0.15s;
   }
   .group.collapsible .group-header:hover {
-    background: #f0ece0;
+    background: var(--surface2);
   }
   .group-expand-icon {
     font-size: 14px;
-    color: #8b8680;
+    color: #8b98a5;
     transition: transform 0.2s;
     flex-shrink: 0;
     margin-left: 8px;
@@ -145,7 +147,7 @@
   }
   .group-check-badge {
     display: inline-block;
-    background: #5d7a5b;
+    background: #2f4f6b;
     color: white;
     font-size: 11px;
     font-weight: 600;
@@ -163,7 +165,7 @@
   }
   .unit-node.unit-level-1 {
     background: white;
-    border: 1px solid #d9d4c8;
+    border: 1px solid #d7dee3;
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 14px;
@@ -172,12 +174,12 @@
   .unit-node.unit-level-3 {
     margin: 6px 12px 6px 12px;
     border-radius: 8px;
-    background: #faf8f3;
-    border: 1px solid #e5e0d3;
+    background: #eef1f4;
+    border: 1px solid #dfe5ea;
     overflow: hidden;
   }
   .unit-node.unit-level-3 {
-    background: #f4f1e8;
+    background: #eef1f4;
   }
   .unit-header {
     display: flex;
@@ -240,7 +242,7 @@
   }
   .unit-check-badge {
     display: inline-block;
-    background: #5d7a5b;
+    background: #2f4f6b;
     color: white;
     font-size: 11px;
     font-weight: 600;
@@ -255,7 +257,7 @@
   /* 트리 안의 group은 들여쓰기 + 박스 약화 */
   .unit-body .group {
     margin: 4px 12px 8px 12px;
-    border: 1px dashed #d9d4c8;
+    border: 1px dashed #d7dee3;
     background: #fff;
   }
   .unit-body .unit-body .group {
@@ -265,15 +267,15 @@
   /* 체크 화면 */
   .group {
     background: white;
-    border: 1px solid #d9d4c8;
+    border: 1px solid #d7dee3;
     border-radius: 10px;
     margin-bottom: 14px;
     overflow: hidden;
   }
   .group-header {
     padding: 12px 16px;
-    border-bottom: 1px solid #ebe6db;
-    background: #faf8f3;
+    border-bottom: 1px solid #dfe5ea;
+    background: #eef1f4;
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -288,7 +290,7 @@
     gap: 6px;
     padding: 6px 10px;
     background: white;
-    border: 1px solid #d9d4c8;
+    border: 1px solid #d7dee3;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -296,29 +298,29 @@
     flex-shrink: 0;
     user-select: none;
   }
-  .group-select-all:hover { border-color: #5d7a5b; }
+  .group-select-all:hover { border-color: #2f4f6b; }
   .group-select-all input {
     margin: 0;
-    accent-color: #5d7a5b;
+    accent-color: #2f4f6b;
   }
   .group-select-all.all-checked {
-    background: #e8f0e5;
-    border-color: #5d7a5b;
-    color: #3d5a3b;
+    background: #e5edf3;
+    border-color: #2f4f6b;
+    color: #223a51;
   }
   .group-subject {
     font-size: 11px;
-    color: #8b8680;
+    color: #8b98a5;
     margin-bottom: 2px;
   }
   .group-title {
-    font-family: 'Noto Serif KR', serif;
-    font-size: 15px;
-    font-weight: 600;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
   }
   .group-path {
     font-size: 12px;
-    color: #6b665e;
+    color: #4d5a65;
     margin-top: 2px;
   }
   .problem-list {
@@ -332,25 +334,25 @@
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    background: #faf8f3;
-    border: 1px solid #ebe6db;
+    background: #eef1f4;
+    border: 1px solid #dfe5ea;
     border-radius: 6px;
     cursor: pointer;
     user-select: none;
     font-size: 13px;
     transition: all 0.1s;
   }
-  .problem-item:hover { border-color: #bfbbb2; }
+  .problem-item:hover { border-color: #c7d0d8; }
   .problem-item.checked {
-    background: #e8f0e5;
-    border-color: #5d7a5b;
-    color: #3d5a3b;
+    background: #e5edf3;
+    border-color: #2f4f6b;
+    color: #223a51;
   }
   .problem-item input[type="checkbox"] {
     margin: 0;
     width: 16px;
     height: 16px;
-    accent-color: #5d7a5b;
+    accent-color: #2f4f6b;
     flex-shrink: 0;
   }
   .problem-num {
@@ -360,7 +362,7 @@
   }
   .problem-diff {
     font-size: 10px;
-    color: #8b8680;
+    color: #8b98a5;
     flex-shrink: 0;
   }
 
@@ -369,7 +371,7 @@
     margin-top: 30px;
     padding: 20px;
     background: white;
-    border: 1px solid #d9d4c8;
+    border: 1px solid #d7dee3;
     border-radius: 10px;
   }
   .comment-box {
@@ -377,17 +379,17 @@
     min-height: 100px;
     padding: 12px;
     font-size: 13px;
-    border: 1px solid #d9d4c8;
+    border: 1px solid #d7dee3;
     border-radius: 6px;
     font-family: inherit;
     resize: vertical;
-    background: #faf8f3;
-    color: #2d2a24;
+    background: #eef1f4;
+    color: #1c2530;
   }
-  .comment-box.placeholder { color: #a8a39a; }
+  .comment-box.placeholder { color: #9aa4ac; }
   .comment-box:focus {
     outline: none;
-    border-color: #5d7a5b;
+    border-color: #2f4f6b;
     background: white;
   }
 
@@ -401,16 +403,16 @@
   }
   .submit-info {
     font-size: 13px;
-    color: #6b665e;
+    color: #4d5a65;
   }
-  .submit-info b { color: #3d5a3b; font-size: 16px; }
+  .submit-info b { color: #223a51; font-size: 16px; }
 
   .toast {
     position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: #2d2a24;
+    background: #1c2530;
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
@@ -472,8 +474,8 @@
 <body>
 
 <noscript>
-<div style="background:#fef3e5;border:1px solid #f0c87a;color:#8a5a1a;padding:14px 18px;margin:20px;border-radius:8px;font-size:13px;line-height:1.6;">
-  ⚠️ <b>이 화면은 파일 미리보기예요.</b><br>
+<div style="background:oklch(95% 0.04 75);border:1px solid oklch(75% 0.09 75);color:oklch(40% 0.08 75);padding:14px 18px;margin:20px;border-radius:8px;font-size:13px;line-height:1.6;">
+  <b>이 화면은 파일 미리보기예요.</b><br>
   왼쪽 아래 <b>공유 버튼(⬆️)</b> → <b>"Safari에서 열기"</b> 또는 <b>"Chrome에서 열기"</b>를 눌러주세요.<br>
   그래야 문제 체크 화면이 나타납니다.
 </div>
@@ -484,7 +486,7 @@
   <!-- 1단계: 이름 입력 -->
   <div id="screen-name" class="screen">
     <h1>오답 체크 제출</h1>
-    <div class="header-sub">개념루트_미적분1 · 총 14문제</div>
+    <div class="header-sub">개념루트_미적분1 · 총 131문제</div>
     <div class="name-card">
       <h2>이름을 입력해주세요</h2>
       <p>이름을 입력한 후 다음 단계로 넘어갈 수 있어요.</p>
@@ -512,7 +514,7 @@
 
       <div class="submit-bar">
         <div class="submit-info">체크한 문제: <b id="checkedCount">0</b></div>
-        <button class="btn btn-lg" onclick="submitFile()">📤 결과 파일 전송하기</button>
+        <button class="btn btn-lg" onclick="submitFile()">결과 파일 전송하기</button>
       </div>
     </div>
   </div>
@@ -522,7 +524,7 @@
 <div id="toast" class="toast"></div>
 
 <!-- 오류 시 화면에 표시 (빈 화면 방지) -->
-<div id="errorBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#b85c5c;color:white;padding:12px 16px;font-size:12px;z-index:9999;line-height:1.5;"></div>
+<div id="errorBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:var(--danger);color:white;padding:12px 16px;font-size:12px;z-index:9999;line-height:1.5;"></div>
 
 <script>
 // 전역 에러 핸들러: 어떤 오류든 빈 화면 대신 메시지 표시
@@ -531,7 +533,7 @@ window.addEventListener('error', function(e) {
     var b = document.getElementById('errorBanner');
     if (b) {
       b.style.display = 'block';
-      b.innerHTML = '⚠️ 스크립트 오류: ' + (e.message || e.error || '알 수 없음') +
+      b.innerHTML = '스크립트 오류: ' + (e.message || e.error || '알 수 없음') +
         '<br><b>카카오톡 내장 브라우저에서 발생한 문제일 수 있어요.</b>' +
         '<br>오른쪽 위 메뉴(⋯ 또는 ⋮)를 눌러서 <b>"다른 브라우저로 열기"</b>를 선택해주세요.';
     }
@@ -542,12 +544,12 @@ window.addEventListener('unhandledrejection', function(e) {
     var b = document.getElementById('errorBanner');
     if (b) {
       b.style.display = 'block';
-      b.textContent = '⚠️ 오류: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+      b.textContent = '오류: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
     }
   } catch (ignore) {}
 });
 
-var DATA = {"studentName":"","suffix":"개념루트_미적분1","groups":[{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"","problems":[{"id":"prob_00001","num":"1","diff":""},{"id":"prob_00002","num":"2","diff":""},{"id":"prob_00003","num":"3","diff":""},{"id":"prob_00004","num":"4","diff":""},{"id":"prob_00005","num":"5","diff":""},{"id":"prob_00006","num":"6","diff":""},{"id":"prob_00007","num":"7","diff":""},{"id":"prob_00008","num":"8","diff":""},{"id":"prob_00009","num":"9","diff":""},{"id":"prob_00010","num":"10","diff":""},{"id":"prob_00011","num":"11","diff":""},{"id":"prob_00012","num":"12","diff":""},{"id":"prob_00013","num":"13","diff":""},{"id":"prob_00014","num":"14","diff":""}]}],"totalCount":14,"createdAt":"2026-06-02T00:44:55.676Z"};
+var DATA = {"studentName":"","suffix":"개념루트_미적분1","groups":[{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"","problems":[{"id":"prob_05118","num":"1","diff":""},{"id":"prob_05119","num":"2","diff":""},{"id":"prob_05120","num":"3","diff":""},{"id":"prob_05121","num":"4","diff":""},{"id":"prob_05122","num":"5","diff":""},{"id":"prob_05123","num":"6","diff":""},{"id":"prob_05124","num":"7","diff":""},{"id":"prob_05125","num":"8","diff":""},{"id":"prob_05126","num":"9","diff":""},{"id":"prob_05127","num":"10","diff":""},{"id":"prob_05128","num":"11","diff":""},{"id":"prob_05129","num":"12","diff":""},{"id":"prob_05130","num":"13","diff":""},{"id":"prob_05131","num":"14","diff":""},{"id":"prob_05132","num":"15","diff":""},{"id":"prob_05133","num":"16","diff":""},{"id":"prob_05134","num":"17","diff":""},{"id":"prob_05135","num":"18","diff":""},{"id":"prob_05136","num":"19","diff":""},{"id":"prob_05137","num":"20","diff":""},{"id":"prob_05138","num":"21","diff":""},{"id":"prob_05139","num":"22","diff":""},{"id":"prob_05140","num":"23","diff":""},{"id":"prob_05141","num":"24","diff":""},{"id":"prob_05142","num":"25","diff":"1단계"},{"id":"prob_05143","num":"26","diff":"1단계"},{"id":"prob_05144","num":"27","diff":"1단계"},{"id":"prob_05145","num":"28","diff":"1단계"},{"id":"prob_05146","num":"29","diff":"1단계"},{"id":"prob_05147","num":"30","diff":"2단계"},{"id":"prob_05148","num":"31","diff":"2단계"},{"id":"prob_05149","num":"32","diff":"2단계"},{"id":"prob_05150","num":"33","diff":"2단계"},{"id":"prob_05151","num":"34","diff":"3단계"},{"id":"prob_05152","num":"35","diff":"3단계"},{"id":"prob_05153","num":"36","diff":"3단계"},{"id":"prob_05154","num":"37","diff":""},{"id":"prob_05155","num":"38","diff":""},{"id":"prob_05156","num":"39","diff":""},{"id":"prob_05157","num":"40","diff":""},{"id":"prob_05158","num":"41","diff":""},{"id":"prob_05159","num":"42","diff":""},{"id":"prob_05160","num":"43","diff":""},{"id":"prob_05161","num":"44","diff":""},{"id":"prob_05162","num":"45","diff":""},{"id":"prob_05163","num":"46","diff":""},{"id":"prob_05164","num":"47","diff":""},{"id":"prob_05165","num":"48","diff":""},{"id":"prob_05166","num":"49","diff":""},{"id":"prob_05167","num":"50","diff":""},{"id":"prob_05168","num":"51","diff":""},{"id":"prob_05169","num":"52","diff":""},{"id":"prob_05170","num":"53","diff":""},{"id":"prob_05171","num":"54","diff":""},{"id":"prob_05172","num":"55","diff":""},{"id":"prob_05173","num":"56","diff":""},{"id":"prob_05174","num":"57","diff":""},{"id":"prob_05175","num":"58","diff":""},{"id":"prob_05176","num":"59","diff":""},{"id":"prob_05177","num":"60","diff":""},{"id":"prob_05178","num":"61","diff":""},{"id":"prob_05179","num":"62","diff":""},{"id":"prob_05180","num":"63","diff":""},{"id":"prob_05181","num":"64","diff":""},{"id":"prob_05182","num":"65","diff":"1단계"},{"id":"prob_05183","num":"66","diff":"1단계"},{"id":"prob_05184","num":"67","diff":"1단계"},{"id":"prob_05185","num":"68","diff":"1단계"},{"id":"prob_05186","num":"69","diff":"1단계"},{"id":"prob_05187","num":"70","diff":"1단계"},{"id":"prob_05188","num":"71","diff":"1단계"},{"id":"prob_05189","num":"72","diff":"1단계"},{"id":"prob_05190","num":"73","diff":"2단계"},{"id":"prob_05191","num":"74","diff":"2단계"},{"id":"prob_05194","num":"75","diff":"2단계"},{"id":"prob_05192","num":"76","diff":"2단계"},{"id":"prob_05193","num":"77","diff":"2단계"},{"id":"prob_05195","num":"78","diff":"2단계"},{"id":"prob_05196","num":"79","diff":"2단계"},{"id":"prob_05197","num":"80","diff":"3단계"},{"id":"prob_05198","num":"81","diff":"3단계"},{"id":"prob_05199","num":"82","diff":"3단계"},{"id":"prob_05200","num":"83","diff":"3단계"}]},{"subject":"미적분1","book":"개념루트","unit1":"1. 함수의 극한과 연속","unit2":"2. 함수의 연속","unit3":"","problems":[{"id":"prob_05201","num":"84","diff":""},{"id":"prob_05202","num":"85","diff":""},{"id":"prob_05203","num":"86","diff":""},{"id":"prob_05204","num":"87","diff":""},{"id":"prob_05205","num":"88","diff":""},{"id":"prob_05206","num":"89","diff":""},{"id":"prob_05207","num":"90","diff":""},{"id":"prob_05208","num":"91","diff":""},{"id":"prob_05209","num":"92","diff":""},{"id":"prob_05210","num":"93","diff":""},{"id":"prob_05211","num":"94","diff":""},{"id":"prob_05212","num":"95","diff":""},{"id":"prob_05213","num":"96","diff":""},{"id":"prob_05214","num":"97","diff":""},{"id":"prob_05215","num":"98","diff":""},{"id":"prob_05216","num":"99","diff":""},{"id":"prob_05217","num":"100","diff":""},{"id":"prob_05218","num":"101","diff":""},{"id":"prob_05219","num":"102","diff":""},{"id":"prob_05220","num":"103","diff":""},{"id":"prob_05222","num":"104","diff":""},{"id":"prob_05221","num":"105","diff":""},{"id":"prob_05223","num":"106","diff":""},{"id":"prob_05224","num":"107","diff":""},{"id":"prob_05225","num":"108","diff":""},{"id":"prob_05226","num":"109","diff":""},{"id":"prob_05227","num":"110","diff":""},{"id":"prob_05228","num":"111","diff":""},{"id":"prob_05229","num":"112","diff":""},{"id":"prob_05230","num":"113","diff":""},{"id":"prob_05231","num":"114","diff":"1단계"},{"id":"prob_05237","num":"115","diff":"1단계"},{"id":"prob_05244","num":"116","diff":"1단계"},{"id":"prob_05233","num":"117","diff":"1단계"},{"id":"prob_05234","num":"118","diff":"1단계"},{"id":"prob_05236","num":"119","diff":"1단계"},{"id":"prob_05238","num":"120","diff":"1단계"},{"id":"prob_05239","num":"121","diff":"1단계"},{"id":"prob_05240","num":"122","diff":"2단계"},{"id":"prob_05241","num":"123","diff":"2단계"},{"id":"prob_05242","num":"124","diff":"2단계"},{"id":"prob_05243","num":"125","diff":"2단계"},{"id":"prob_05245","num":"126","diff":"2단계"},{"id":"prob_05246","num":"127","diff":"2단계"},{"id":"prob_05247","num":"128","diff":"2단계"},{"id":"prob_05248","num":"129","diff":"2단계"},{"id":"prob_05249","num":"130","diff":"3단계"},{"id":"prob_05250","num":"131","diff":"3단계"}]}],"totalCount":131,"createdAt":"2026-07-17T10:04:15.701Z"};
 var checkedIds = {};  // Set 대신 객체 사용 (구형 브라우저 호환)
 var checkedCount = 0;
 var COMMENT_PLACEHOLDER = '이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.';
@@ -646,7 +648,7 @@ function renderCheckScreen() {
   window.unitNodeRegistry = [];
 
   if (DATA.groups.length === 0) {
-    container.innerHTML = '<div style="background:#fef3e5;padding:20px;border-radius:8px;text-align:center;color:#8a5a1a;">문제가 없습니다.</div>';
+    container.innerHTML = '<div style="background:oklch(95% 0.04 75);padding:20px;border-radius:8px;text-align:center;color:var(--warning);">문제가 없습니다.</div>';
     return;
   }
 
@@ -1048,7 +1050,7 @@ function showSendGuide(filename, isMobile) {
 
   var title = document.createElement('div');
   title.style.cssText = 'font-size:20px;font-weight:700;margin-bottom:6px;';
-  title.textContent = '✅ 결과 파일이 저장됐어요!';
+  title.textContent = '결과 파일이 저장됐어요!';
 
   var sub = document.createElement('div');
   sub.style.cssText = 'font-size:14px;color:#555;margin-bottom:16px;';
@@ -1058,7 +1060,7 @@ function showSendGuide(filename, isMobile) {
   ol.style.cssText = 'margin:0 0 18px;padding-left:22px;line-height:1.9;font-size:15px;';
   var steps = isMobile
     ? ['파일이 저장됐어요.', '저장된 파일을 카카오톡으로 선생님께 전송해주세요. ("파일" 앱에서 방금 받은 파일을 찾아 공유 → 카카오톡)']
-    : ['방금 다운로드 폴더에 파일이 저장됐어요. (파일명: ' + filename + ')', '이 파일을 카카오톡으로 선생님께 전송해주세요. (카톡 대화창에 끌어다 놓거나, 첨부 📎 → 파일 선택)'];
+    : ['방금 다운로드 폴더에 파일이 저장됐어요. (파일명: ' + filename + ')', '이 파일을 카카오톡으로 선생님께 전송해주세요. (카톡 대화창에 끌어다 놓거나, 첨부 → 파일 선택)'];
   for (var i = 0; i < steps.length; i++) {
     var li = document.createElement('li');
     li.textContent = steps[i];
@@ -1067,7 +1069,7 @@ function showSendGuide(filename, isMobile) {
 
   var tip = document.createElement('div');
   tip.style.cssText = 'background:#f6f2fb;border-radius:10px;padding:12px 14px;font-size:13px;color:#555;margin-bottom:16px;';
-  tip.textContent = '💡 파일을 못 찾겠으면, 카톡으로 "선생님 파일 어떻게 보내요?"라고 물어보세요!';
+  tip.textContent = '파일을 못 찾겠으면, 카톡으로 "선생님 파일 어떻게 보내요?"라고 물어보세요!';
 
   var btn = document.createElement('button');
   btn.style.cssText = 'width:100%;padding:13px;border:none;border-radius:10px;background:#7c5cbf;color:#fff;font-size:15px;font-weight:600;cursor:pointer;';
@@ -1102,7 +1104,7 @@ function fallbackDownload(jsonText, filename, isMobile) {
     var fallbackArea = document.createElement('div');
     fallbackArea.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:white;padding:20px;overflow:auto;z-index:99999;';
     fallbackArea.innerHTML =
-      '<h2 style="margin-top:0;">⚠️ 다운로드가 안 되는 환경입니다</h2>' +
+      '<h2 style="margin-top:0;">다운로드가 안 되는 환경입니다</h2>' +
       '<p>아래 내용을 모두 선택해서 복사하고, 메모장에 붙여넣기 하여 ' + escapeHtml(filename) + ' 이름으로 저장해주세요.</p>' +
       '<button onclick="this.parentElement.remove()" style="margin-bottom:10px;">닫기</button>' +
       '<textarea readonly style="width:100%;height:60vh;font-family:monospace;font-size:11px;">' +
@@ -1121,7 +1123,7 @@ function init() {
     var b = document.getElementById('errorBanner');
     if (b) {
       b.style.display = 'block';
-      b.textContent = '⚠️ 초기화 오류: ' + e.message;
+      b.textContent = '초기화 오류: ' + e.message;
     }
   }
 }
