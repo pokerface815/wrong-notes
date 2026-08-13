@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>오답 체크 (자이스토리_미적분1)</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    margin: 0;
+    background: #f5f7f9;
+    color: #1c2530;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 30px 20px 100px;
+  }
+  h1 {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 21px;
+    margin: 0 0 4px;
+  }
+  .header-sub {
+    color: #8b98a5;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  /* 이름 입력 화면 */
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .name-card {
+    background: white;
+    border: 1px solid #d7dee3;
+    border-radius: 10px;
+    padding: 40px 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    text-align: center;
+    margin-top: 40px;
+  }
+  .name-card h2 {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    margin: 0 0 8px;
+  }
+  .name-card p {
+    color: #4d5a65;
+    font-size: 13px;
+    margin: 0 0 24px;
+  }
+  .name-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px;
+    border: 1.5px solid #d7dee3;
+    border-radius: 8px;
+    font-family: inherit;
+    text-align: center;
+    background: #eef1f4;
+  }
+  .name-input:focus {
+    outline: none;
+    border-color: #2f4f6b;
+    background: white;
+  }
+  .btn {
+    background: #2f4f6b;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 16px;
+    font-family: inherit;
+  }
+  .btn:hover { background: #223a51; }
+  .btn:disabled { background: #b8c0c7; cursor: not-allowed; }
+  .btn.btn-lg { padding: 14px 32px; font-size: 15px; }
+  .btn.btn-danger { background: var(--danger); }
+  .btn.btn-danger:hover { background: var(--danger-dark); }
+
+  .btn-mini {
+    background: white;
+    color: #2f4f6b;
+    border: 1px solid #d7dee3;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-mini:hover { border-color: #2f4f6b; background: #eef1f4; }
+
+  /* 요약 바: 상단에 선택 개수 표시 */
+  .summary-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+    border: 1px solid #d7dee3;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .summary-bar b { color: #223a51; font-size: 16px; }
+
+  /* 아코디언 그룹 */
+  .group.collapsible .group-header {
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .group.collapsible .group-header:hover {
+    background: var(--surface2);
+  }
+  .group-expand-icon {
+    font-size: 14px;
+    color: #8b98a5;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .group.expanded .group-expand-icon {
+    transform: rotate(90deg);
+  }
+  .group .problem-list {
+    display: grid;  /* 항상 표시 (트리 부모가 펼침 제어) */
+  }
+  .group.collapsible .problem-list {
+    display: none;  /* collapsible 클래스 있을 때만 접힘 (호환성) */
+  }
+  .group.collapsible.expanded .problem-list {
+    display: grid;
+  }
+  .group-check-badge {
+    display: inline-block;
+    background: #2f4f6b;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .group-check-badge.zero {
+    display: none;
+  }
+
+  /* ===== 단원 트리 (대단원/중단원/소단원) ===== */
+  .unit-node {
+    margin-bottom: 8px;
+  }
+  .unit-node.unit-level-1 {
+    background: white;
+    border: 1px solid #d7dee3;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .unit-node.unit-level-2,
+  .unit-node.unit-level-3 {
+    margin: 6px 12px 6px 12px;
+    border-radius: 8px;
+    background: #eef1f4;
+    border: 1px solid #dfe5ea;
+    overflow: hidden;
+  }
+  .unit-node.unit-level-3 {
+    background: #eef1f4;
+  }
+  .unit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .unit-node.unit-level-1 .unit-header {
+    padding: 16px 18px;
+  }
+  .unit-node.unit-level-2 .unit-header {
+    padding: 10px 14px;
+  }
+  .unit-node.unit-level-3 .unit-header {
+    padding: 8px 12px;
+  }
+  .unit-header:hover {
+    background: rgba(0,0,0,0.03);
+  }
+  .unit-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .unit-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2a2520;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .unit-node.unit-level-2 .unit-title {
+    font-size: 14px;
+    color: #3a3530;
+  }
+  .unit-node.unit-level-3 .unit-title {
+    font-size: 13px;
+    color: #4a4540;
+    font-weight: 500;
+  }
+  .unit-expand-icon {
+    color: #9a958e;
+    font-size: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .unit-node.expanded > .unit-header .unit-expand-icon {
+    transform: rotate(90deg);
+  }
+  .unit-body {
+    display: none;
+    padding-bottom: 8px;
+  }
+  .unit-node.expanded > .unit-body {
+    display: block;
+  }
+  .unit-check-badge {
+    display: inline-block;
+    background: #2f4f6b;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+  }
+  .unit-check-badge.zero {
+    display: none;
+  }
+
+  /* 트리 안의 group은 들여쓰기 + 박스 약화 */
+  .unit-body .group {
+    margin: 4px 12px 8px 12px;
+    border: 1px dashed #d7dee3;
+    background: #fff;
+  }
+  .unit-body .unit-body .group {
+    margin: 4px 8px 6px 8px;
+  }
+
+  /* 체크 화면 */
+  .group {
+    background: white;
+    border: 1px solid #d7dee3;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .group-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #dfe5ea;
+    background: #eef1f4;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .group-header-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .group-select-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid #d7dee3;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .group-select-all:hover { border-color: #2f4f6b; }
+  .group-select-all input {
+    margin: 0;
+    accent-color: #2f4f6b;
+  }
+  .group-select-all.all-checked {
+    background: #e5edf3;
+    border-color: #2f4f6b;
+    color: #223a51;
+  }
+  .group-subject {
+    font-size: 11px;
+    color: #8b98a5;
+    margin-bottom: 2px;
+  }
+  .group-title {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .group-path {
+    font-size: 12px;
+    color: #4d5a65;
+    margin-top: 2px;
+  }
+  .problem-list {
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .problem-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #eef1f4;
+    border: 1px solid #dfe5ea;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 13px;
+    transition: all 0.1s;
+  }
+  .problem-item:hover { border-color: #c7d0d8; }
+  .problem-item.checked {
+    background: #e5edf3;
+    border-color: #2f4f6b;
+    color: #223a51;
+  }
+  .problem-item input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #2f4f6b;
+    flex-shrink: 0;
+  }
+  .problem-num {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .problem-diff {
+    font-size: 10px;
+    color: #8b98a5;
+    flex-shrink: 0;
+  }
+  .problem-page {
+    font-size: 10px;
+    font-weight: 700;
+    color: #075985;
+    background: #e0f2fe;
+    border-radius: 4px;
+    padding: 1px 6px;
+    flex-shrink: 0;
+  }
+
+  /* 하단 의견 + 제출 */
+  .bottom-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #d7dee3;
+    border-radius: 10px;
+  }
+  .comment-box {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    font-size: 13px;
+    border: 1px solid #d7dee3;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    background: #eef1f4;
+    color: #1c2530;
+  }
+  .comment-box.placeholder { color: #9aa4ac; }
+  .comment-box:focus {
+    outline: none;
+    border-color: #2f4f6b;
+    background: white;
+  }
+
+  .submit-bar {
+    margin-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .submit-info {
+    font-size: 13px;
+    color: #4d5a65;
+  }
+  .submit-info b { color: #223a51; font-size: 16px; }
+
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1c2530;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+
+  /* 모바일 최적화 */
+  @media (max-width: 600px) {
+    .container { padding: 20px 14px 100px; }
+    h1 { font-size: 18px; }
+    .name-card { padding: 28px 20px; margin-top: 20px; }
+    .name-card h2 { font-size: 16px; }
+    .problem-list {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 6px;
+    }
+    .problem-item {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .problem-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    .group-header {
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+    .group-select-all {
+      align-self: flex-end;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .group-select-all input {
+      width: 18px;
+      height: 18px;
+    }
+    .submit-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .submit-bar .btn {
+      width: 100%;
+    }
+    .comment-box {
+      min-height: 120px;
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<noscript>
+<div style="background:oklch(95% 0.04 75);border:1px solid oklch(75% 0.09 75);color:oklch(40% 0.08 75);padding:14px 18px;margin:20px;border-radius:8px;font-size:13px;line-height:1.6;">
+  <b>이 화면은 파일 미리보기예요.</b><br>
+  왼쪽 아래 <b>공유 버튼(⬆️)</b> → <b>"Safari에서 열기"</b> 또는 <b>"Chrome에서 열기"</b>를 눌러주세요.<br>
+  그래야 문제 체크 화면이 나타납니다.
+</div>
+</noscript>
+
+<div class="container">
+
+  <!-- 1단계: 이름 입력 -->
+  <div id="screen-name" class="screen">
+    <h1>오답 체크 제출</h1>
+    <div class="header-sub">자이스토리_미적분1 · 총 181문제</div>
+    <div class="name-card">
+      <h2>이름을 입력해주세요</h2>
+      <p>이름을 입력한 후 다음 단계로 넘어갈 수 있어요.</p>
+      <input type="text" id="nameInput" class="name-input" placeholder="이름" autocomplete="off">
+      <br>
+      <button id="nameNextBtn" class="btn btn-lg" disabled>다음 →</button>
+    </div>
+  </div>
+
+  <!-- 2단계: 문제 체크 (아코디언) -->
+  <div id="screen-check" class="screen">
+    <h1 id="checkTitle">오답 체크</h1>
+    <div class="header-sub" id="checkSubHeader">단원을 눌러서 펼친 후, 틀린 문제를 체크하세요</div>
+
+    <div id="summaryBar" class="summary-bar">
+      <div>선택된 문제 <b id="summaryCount">0</b>개</div>
+      <button class="btn-mini" onclick="collapseAllUnits()">모두 접기</button>
+    </div>
+
+    <div id="groupsContainer"></div>
+
+    <div class="bottom-section">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;">선생님께 전하고 싶은 말</div>
+      <textarea id="commentBox" class="comment-box placeholder">이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.</textarea>
+
+      <div class="submit-bar">
+        <div class="submit-info">체크한 문제: <b id="checkedCount">0</b></div>
+        <button class="btn btn-lg" onclick="submitFile()">결과 파일 전송하기</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- 오류 시 화면에 표시 (빈 화면 방지) -->
+<div id="errorBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:var(--danger);color:white;padding:12px 16px;font-size:12px;z-index:9999;line-height:1.5;"></div>
+
+<script>
+// 전역 에러 핸들러: 어떤 오류든 빈 화면 대신 메시지 표시
+window.addEventListener('error', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.innerHTML = '스크립트 오류: ' + (e.message || e.error || '알 수 없음') +
+        '<br><b>카카오톡 내장 브라우저에서 발생한 문제일 수 있어요.</b>' +
+        '<br>오른쪽 위 메뉴(⋯ 또는 ⋮)를 눌러서 <b>"다른 브라우저로 열기"</b>를 선택해주세요.';
+    }
+  } catch (ignore) {}
+});
+window.addEventListener('unhandledrejection', function(e) {
+  try {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '오류: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+    }
+  } catch (ignore) {}
+});
+
+var DATA = {"studentName":"","suffix":"자이스토리_미적분1","groups":[{"subject":"미적분1","book":"자이스토리","unit1":"","unit2":"A. 함수의 극한","unit3":"1. 수능 유형별 기출 문제","problems":[{"id":"prob_06860","num":"51","diff":"대표","page":""},{"id":"prob_06861","num":"52","diff":"☆☆☆","page":""},{"id":"prob_06862","num":"53","diff":"☆☆☆","page":""},{"id":"prob_06863","num":"54","diff":"☆☆☆","page":""},{"id":"prob_06864","num":"55","diff":"☆☆☆","page":""},{"id":"prob_06865","num":"56","diff":"☆☆☆","page":""},{"id":"prob_06866","num":"57","diff":"☆☆☆","page":""},{"id":"prob_06867","num":"58","diff":"☆☆☆","page":""},{"id":"prob_06868","num":"59","diff":"☆☆☆","page":""},{"id":"prob_06869","num":"60","diff":"☆☆☆","page":""},{"id":"prob_06870","num":"61","diff":"☆☆☆","page":""},{"id":"prob_06871","num":"62","diff":"☆☆☆","page":""},{"id":"prob_06872","num":"63","diff":"☆☆☆","page":""},{"id":"prob_06873","num":"64","diff":"☆☆☆","page":""},{"id":"prob_06874","num":"65","diff":"☆☆☆","page":""},{"id":"prob_06875","num":"66","diff":"☆☆☆","page":""},{"id":"prob_06876","num":"67","diff":"☆☆☆","page":""},{"id":"prob_06877","num":"68","diff":"☆☆☆","page":""},{"id":"prob_06878","num":"69","diff":"☆☆☆","page":""},{"id":"prob_06879","num":"70","diff":"☆☆☆","page":""},{"id":"prob_06880","num":"71","diff":"☆☆☆","page":""},{"id":"prob_06881","num":"72","diff":"☆☆☆","page":""},{"id":"prob_06882","num":"73","diff":"☆☆☆","page":""},{"id":"prob_06883","num":"74","diff":"☆☆☆","page":""},{"id":"prob_06884","num":"75","diff":"☆☆☆","page":""},{"id":"prob_06885","num":"76","diff":"★☆☆","page":""},{"id":"prob_06886","num":"77","diff":"★★☆","page":""},{"id":"prob_06887","num":"78","diff":"대표","page":""},{"id":"prob_06888","num":"79","diff":"☆☆☆","page":""},{"id":"prob_06889","num":"80","diff":"★☆☆","page":""},{"id":"prob_06890","num":"81","diff":"★☆☆","page":""},{"id":"prob_06891","num":"82","diff":"대표","page":""},{"id":"prob_06892","num":"83","diff":"☆☆☆","page":""},{"id":"prob_06893","num":"84","diff":"☆☆☆","page":""},{"id":"prob_06894","num":"85","diff":"☆☆☆","page":""},{"id":"prob_06895","num":"86","diff":"☆☆☆","page":""},{"id":"prob_06896","num":"87","diff":"☆☆☆","page":""},{"id":"prob_06897","num":"88","diff":"★☆☆","page":""},{"id":"prob_06898","num":"89","diff":"★☆☆","page":""},{"id":"prob_06899","num":"90","diff":"대표","page":""},{"id":"prob_06900","num":"91","diff":"☆☆☆","page":""},{"id":"prob_06901","num":"92","diff":"☆☆☆","page":""},{"id":"prob_06902","num":"93","diff":"☆☆☆","page":""},{"id":"prob_06903","num":"94","diff":"☆☆☆","page":""},{"id":"prob_06904","num":"95","diff":"☆☆☆","page":""},{"id":"prob_06905","num":"96","diff":"★☆☆","page":""},{"id":"prob_06906","num":"97","diff":"대표","page":""},{"id":"prob_06907","num":"98","diff":"☆☆☆","page":""},{"id":"prob_06908","num":"99","diff":"★☆☆","page":""},{"id":"prob_06909","num":"100","diff":"대표","page":""},{"id":"prob_06910","num":"101","diff":"☆☆☆","page":""},{"id":"prob_06911","num":"102","diff":"☆☆☆","page":""},{"id":"prob_06912","num":"103","diff":"☆☆☆","page":""},{"id":"prob_06913","num":"104","diff":"☆☆☆","page":""},{"id":"prob_06914","num":"105","diff":"☆☆☆","page":""},{"id":"prob_06915","num":"106","diff":"☆☆☆","page":""},{"id":"prob_06916","num":"107","diff":"☆☆☆","page":""},{"id":"prob_06917","num":"108","diff":"☆☆☆","page":""},{"id":"prob_06918","num":"109","diff":"☆☆☆","page":""},{"id":"prob_06919","num":"110","diff":"☆☆☆","page":""},{"id":"prob_06920","num":"111","diff":"★☆☆","page":""},{"id":"prob_06921","num":"112","diff":"대표","page":""},{"id":"prob_06922","num":"113","diff":"☆☆☆","page":""},{"id":"prob_06923","num":"114","diff":"☆☆☆","page":""},{"id":"prob_06924","num":"115","diff":"☆☆☆","page":""},{"id":"prob_06925","num":"116","diff":"☆☆☆","page":""},{"id":"prob_06926","num":"117","diff":"☆☆☆","page":""},{"id":"prob_06927","num":"118","diff":"대표","page":""},{"id":"prob_06928","num":"119","diff":"☆☆☆","page":""},{"id":"prob_06929","num":"120","diff":"☆☆☆","page":""},{"id":"prob_06930","num":"121","diff":"☆☆☆","page":""},{"id":"prob_06931","num":"122","diff":"☆☆☆","page":""},{"id":"prob_06932","num":"123","diff":"☆☆☆","page":""},{"id":"prob_06933","num":"124","diff":"☆☆☆","page":""},{"id":"prob_06934","num":"125","diff":"☆☆☆","page":""},{"id":"prob_06935","num":"126","diff":"☆☆☆","page":""},{"id":"prob_06936","num":"127","diff":"★☆☆","page":""},{"id":"prob_06937","num":"128","diff":"대표","page":""},{"id":"prob_06938","num":"129","diff":"☆☆☆","page":""},{"id":"prob_06939","num":"130","diff":"☆☆☆","page":""},{"id":"prob_06940","num":"131","diff":"★☆☆","page":""},{"id":"prob_06941","num":"132","diff":"대표","page":""},{"id":"prob_06942","num":"133","diff":"☆☆☆","page":""},{"id":"prob_06943","num":"134","diff":"☆☆☆","page":""},{"id":"prob_06944","num":"135","diff":"대표","page":""},{"id":"prob_06945","num":"136","diff":"☆☆☆","page":""},{"id":"prob_06946","num":"137","diff":"☆☆☆","page":""},{"id":"prob_06947","num":"138","diff":"☆☆☆","page":""},{"id":"prob_06948","num":"139","diff":"☆☆☆","page":""},{"id":"prob_06949","num":"140","diff":"☆☆☆","page":""},{"id":"prob_06950","num":"141","diff":"★☆☆","page":""},{"id":"prob_06951","num":"142","diff":"대표","page":""},{"id":"prob_06952","num":"143","diff":"☆☆☆","page":""},{"id":"prob_06953","num":"144","diff":"☆☆☆","page":""},{"id":"prob_06954","num":"145","diff":"☆☆☆","page":""},{"id":"prob_06955","num":"146","diff":"☆☆☆","page":""},{"id":"prob_06956","num":"147","diff":"☆☆☆","page":""},{"id":"prob_06957","num":"148","diff":"☆☆☆","page":""},{"id":"prob_06958","num":"149","diff":"대표","page":""},{"id":"prob_06959","num":"150","diff":"☆☆☆","page":""},{"id":"prob_06960","num":"151","diff":"★☆☆","page":""},{"id":"prob_06961","num":"152","diff":"★★☆","page":""},{"id":"prob_06962","num":"153","diff":"★★☆","page":""},{"id":"prob_06963","num":"154","diff":"대표","page":""},{"id":"prob_06964","num":"155","diff":"☆☆☆","page":""},{"id":"prob_06965","num":"156","diff":"★☆☆","page":""},{"id":"prob_06966","num":"157","diff":"대표","page":""},{"id":"prob_06967","num":"158","diff":"★☆☆","page":""},{"id":"prob_06968","num":"159","diff":"★☆☆","page":""},{"id":"prob_06969","num":"160","diff":"★☆☆","page":""},{"id":"prob_06970","num":"161","diff":"★★☆","page":""},{"id":"prob_06971","num":"162","diff":"대표","page":""},{"id":"prob_06972","num":"163","diff":"☆☆☆","page":""},{"id":"prob_06973","num":"164","diff":"☆☆☆","page":""},{"id":"prob_06974","num":"165","diff":"☆☆☆","page":""},{"id":"prob_06975","num":"166","diff":"★☆☆","page":""},{"id":"prob_06976","num":"167","diff":"★☆☆","page":""},{"id":"prob_06977","num":"168","diff":"★☆☆","page":""},{"id":"prob_06978","num":"169","diff":"★☆☆","page":""},{"id":"prob_06979","num":"170","diff":"★☆☆","page":""},{"id":"prob_06980","num":"171","diff":"★☆☆","page":""},{"id":"prob_06981","num":"172","diff":"★☆☆","page":""},{"id":"prob_06982","num":"173","diff":"★☆☆","page":""},{"id":"prob_06983","num":"174","diff":"★☆☆","page":""},{"id":"prob_06984","num":"175","diff":"★☆☆","page":""},{"id":"prob_06985","num":"176","diff":"★★☆","page":""},{"id":"prob_06986","num":"177","diff":"★★☆","page":""},{"id":"prob_06987","num":"178","diff":"★★☆","page":""},{"id":"prob_06988","num":"179","diff":"★★☆","page":""},{"id":"prob_06989","num":"180","diff":"대표","page":""},{"id":"prob_06990","num":"181","diff":"☆☆☆","page":""},{"id":"prob_06991","num":"182","diff":"☆☆☆","page":""},{"id":"prob_06992","num":"183","diff":"★☆☆","page":""},{"id":"prob_06993","num":"184","diff":"★☆☆","page":""},{"id":"prob_06997","num":"185","diff":"대표","page":""},{"id":"prob_06994","num":"186","diff":"★☆☆","page":""},{"id":"prob_06996","num":"187","diff":"★☆☆","page":""},{"id":"prob_06999","num":"188","diff":"★☆☆","page":""},{"id":"prob_07000","num":"189","diff":"★☆☆","page":""},{"id":"prob_07001","num":"190","diff":"★☆☆","page":""},{"id":"prob_07002","num":"191","diff":"★☆☆","page":""},{"id":"prob_07003","num":"192","diff":"★★☆","page":""},{"id":"prob_07004","num":"193","diff":"★★☆","page":""},{"id":"prob_07005","num":"194","diff":"★★☆","page":""},{"id":"prob_07006","num":"195","diff":"★★☆","page":""},{"id":"prob_07007","num":"196","diff":"대표","page":""},{"id":"prob_07008","num":"197","diff":"★☆☆","page":""},{"id":"prob_07009","num":"198","diff":"★☆☆","page":""},{"id":"prob_07010","num":"199","diff":"★☆☆","page":""},{"id":"prob_07011","num":"200","diff":"★☆☆","page":""},{"id":"prob_07012","num":"201","diff":"★★☆","page":""},{"id":"prob_07013","num":"202","diff":"★★☆","page":""},{"id":"prob_07014","num":"203","diff":"★★☆","page":""},{"id":"prob_07015","num":"204","diff":"대표","page":""},{"id":"prob_07016","num":"205","diff":"★☆☆","page":""},{"id":"prob_07017","num":"206","diff":"★☆☆","page":""},{"id":"prob_07018","num":"207","diff":"★★☆","page":""},{"id":"prob_07019","num":"208","diff":"★★☆","page":""}]},{"subject":"미적분1","book":"자이스토리","unit1":"","unit2":"A. 함수의 극한","unit3":"2. 내신 유형별 서술형 문제","problems":[{"id":"prob_07020","num":"209","diff":"★★☆","page":""},{"id":"prob_07021","num":"210","diff":"★★☆","page":""},{"id":"prob_07022","num":"211","diff":"★☆☆","page":""},{"id":"prob_07023","num":"212","diff":"★★☆","page":""},{"id":"prob_07024","num":"213","diff":"★☆☆","page":""},{"id":"prob_07025","num":"214","diff":"★☆☆","page":""},{"id":"prob_07026","num":"215","diff":"★☆☆","page":""},{"id":"prob_07027","num":"216","diff":"★★★","page":""},{"id":"prob_07028","num":"217","diff":"★★☆","page":""},{"id":"prob_07029","num":"218","diff":"★★★","page":""}]},{"subject":"미적분1","book":"자이스토리","unit1":"","unit2":"A. 함수의 극한","unit3":"3. 1등급 마스터 문제","problems":[{"id":"prob_07030","num":"219","diff":"★★★","page":""},{"id":"prob_07031","num":"220","diff":"★★★","page":""},{"id":"prob_07032","num":"221","diff":"★★★","page":""},{"id":"prob_07033","num":"222","diff":"★★★","page":""},{"id":"prob_07034","num":"223","diff":"1등급 대비","page":""},{"id":"prob_07035","num":"224","diff":"2등급 대비","page":""},{"id":"prob_07036","num":"225","diff":"1등급 대비","page":""},{"id":"prob_07037","num":"226","diff":"1등급 대비","page":""},{"id":"prob_07038","num":"227","diff":"2등급 대비","page":""},{"id":"prob_07039","num":"228","diff":"1등급 대비","page":""},{"id":"prob_07040","num":"229","diff":"1등급 대비","page":""},{"id":"prob_07041","num":"230","diff":"2등급 대비","page":""},{"id":"prob_07042","num":"231","diff":"1등급 대비","page":""}]}],"totalCount":181,"createdAt":"2026-08-13T02:42:00.715Z"};
+var checkedIds = {};  // Set 대신 객체 사용 (구형 브라우저 호환)
+var checkedCount = 0;
+var COMMENT_PLACEHOLDER = '이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 선생님이 알았으면 하는 내용을 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요.';
+var groupItemRegistry = {};
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+function showScreen(name) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+  var target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+function updateCheckedCount() {
+  var el = document.getElementById('checkedCount');
+  if (el) el.textContent = checkedCount;
+}
+
+// ===== 이름 입력 =====
+function initNameScreen() {
+  var input = document.getElementById('nameInput');
+  var btn = document.getElementById('nameNextBtn');
+  if (!input || !btn) return;
+
+  // URL ?name= 파라미터가 있으면 자동 입력 + 이름 화면 건너뛰기
+  var urlName = '';
+  try { urlName = (new URLSearchParams(window.location.search).get('name') || '').trim(); } catch (e) {}
+  if (urlName && !DATA.studentName) DATA.studentName = urlName;
+
+  if (DATA.studentName) {
+    input.value = DATA.studentName;
+    btn.disabled = false;
+  }
+
+  input.addEventListener('input', function() {
+    btn.disabled = input.value.trim().length === 0;
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !btn.disabled) btn.click();
+  });
+  btn.addEventListener('click', function() {
+    DATA.studentName = input.value.trim();
+    renderCheckScreen();
+    showScreen('check');
+  });
+
+  // 이름이 URL로 들어왔으면 바로 체크 화면으로
+  if (urlName) {
+    DATA.studentName = urlName;
+    renderCheckScreen();
+    showScreen('check');
+  }
+}
+
+// ===== 의견 박스 =====
+function initCommentBox() {
+  var commentBox = document.getElementById('commentBox');
+  if (!commentBox) return;
+  commentBox.addEventListener('focus', function() {
+    if (commentBox.classList.contains('placeholder')) {
+      commentBox.value = '';
+      commentBox.classList.remove('placeholder');
+    }
+  });
+  commentBox.addEventListener('blur', function() {
+    if (commentBox.value.trim() === '') {
+      commentBox.value = COMMENT_PLACEHOLDER;
+      commentBox.classList.add('placeholder');
+    }
+  });
+}
+
+// ===== 체크 화면 렌더 =====
+function renderCheckScreen() {
+  var titleEl = document.getElementById('checkTitle');
+  if (titleEl) titleEl.textContent = DATA.studentName + ' 학생의 오답 체크';
+
+  var container = document.getElementById('groupsContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  groupItemRegistry = {};
+  window.unitNodeRegistry = [];
+
+  if (DATA.groups.length === 0) {
+    container.innerHTML = '<div style="background:oklch(95% 0.04 75);padding:20px;border-radius:8px;text-align:center;color:var(--warning);">문제가 없습니다.</div>';
+    return;
+  }
+
+  // 그룹들을 단원 트리로 변환: unit1 → unit2 → unit3 → problems
+  var tree = buildUnitTree(DATA.groups);
+  // 트리를 화면에 렌더
+  renderUnitTree(container, tree, 1);
+  updateSummary();
+}
+
+// 평면 그룹 배열 → 단원 트리 구조
+function buildUnitTree(groups) {
+  // tree 구조: { name, level, children: [], groups: [] (terminal에서만) }
+  var roots = [];
+  var rootMap = {};
+
+  for (var gi = 0; gi < groups.length; gi++) {
+    var g = groups[gi];
+    var u1 = g.unit1 || '(단원 미지정)';
+    var u2 = g.unit2 || '';
+    var u3 = g.unit3 || '';
+
+    // 레벨1
+    if (!rootMap[u1]) {
+      var node1 = { name: u1, level: 1, children: [], childMap: {}, groupIndices: [] };
+      rootMap[u1] = node1;
+      roots.push(node1);
+    }
+    var n1 = rootMap[u1];
+
+    if (!u2) {
+      // 중단원 없음 → 대단원에 직접 그룹 매달기
+      n1.groupIndices.push(gi);
+      continue;
+    }
+
+    // 레벨2
+    if (!n1.childMap[u2]) {
+      var node2 = { name: u2, level: 2, children: [], childMap: {}, groupIndices: [] };
+      n1.childMap[u2] = node2;
+      n1.children.push(node2);
+    }
+    var n2 = n1.childMap[u2];
+
+    if (!u3) {
+      // 소단원 없음 → 중단원에 직접 그룹 매달기
+      n2.groupIndices.push(gi);
+      continue;
+    }
+
+    // 레벨3
+    if (!n2.childMap[u3]) {
+      var node3 = { name: u3, level: 3, children: [], childMap: {}, groupIndices: [] };
+      n2.childMap[u3] = node3;
+      n2.children.push(node3);
+    }
+    var n3 = n2.childMap[u3];
+    n3.groupIndices.push(gi);
+  }
+
+  return roots;
+}
+
+// 트리를 재귀적으로 렌더
+function renderUnitTree(container, nodes, level) {
+  for (var i = 0; i < nodes.length; i++) {
+    var node = nodes[i];
+    buildUnitNode(container, node);
+  }
+}
+
+// 한 단원 노드를 빌드 (재귀적으로 자식 포함)
+function buildUnitNode(container, node) {
+  var nodeEl = document.createElement('div');
+  nodeEl.className = 'unit-node unit-level-' + node.level + ' collapsible';
+  // 대단원은 기본적으로 펼친 상태로 (중단원 보임)
+  if (node.level === 1) {
+    nodeEl.classList.add('expanded');
+  }
+
+  // 헤더
+  var header = document.createElement('div');
+  header.className = 'unit-header';
+
+  // 헤더 클릭으로 펼침/접힘
+  var titleHtml =
+    '<div class="unit-title">' + escapeHtml(node.name) +
+    '<span class="unit-check-badge zero">0</span>' +
+    '</div>';
+  header.innerHTML =
+    '<div class="unit-header-content">' + titleHtml + '</div>' +
+    '<span class="unit-expand-icon">▶</span>';
+
+  nodeEl.appendChild(header);
+
+  // 자식 컨테이너
+  var body = document.createElement('div');
+  body.className = 'unit-body';
+  nodeEl.appendChild(body);
+
+  // 헤더 클릭 → 토글
+  header.addEventListener('click', function() {
+    nodeEl.classList.toggle('expanded');
+  });
+
+  // 자식 단원이 있으면 재귀
+  if (node.children.length > 0) {
+    renderUnitTree(body, node.children, node.level + 1);
+  }
+
+  // 직접 매달린 그룹들 (자식이 없는 단계의 단원)
+  for (var gi = 0; gi < node.groupIndices.length; gi++) {
+    var gIdx = node.groupIndices[gi];
+    var g = DATA.groups[gIdx];
+    buildGroupCard(body, g, gIdx);
+  }
+
+  // 배지 업데이트를 위해 노드 등록
+  if (!window.unitNodeRegistry) window.unitNodeRegistry = [];
+  window.unitNodeRegistry.push({ el: nodeEl, node: node });
+
+  container.appendChild(nodeEl);
+}
+
+function updateSummary() {
+  var count = 0;
+  for (var id in checkedIds) { if (checkedIds[id]) count++; }
+  var el = document.getElementById('summaryCount');
+  if (el) el.textContent = count;
+  var el2 = document.getElementById('checkedCount');
+  if (el2) el2.textContent = count;
+}
+
+function collapseAllUnits() {
+  // 트리 노드들 모두 접기
+  var unitNodes = document.querySelectorAll('.unit-node.collapsible');
+  for (var i = 0; i < unitNodes.length; i++) {
+    unitNodes[i].classList.remove('expanded');
+  }
+  // 호환성: 기존 구조의 .group.collapsible도 접기
+  var groups = document.querySelectorAll('.group.collapsible');
+  for (var j = 0; j < groups.length; j++) {
+    groups[j].classList.remove('expanded');
+  }
+}
+
+function buildGroupCard(container, g, gIdx) {
+  var groupEl = document.createElement('div');
+  groupEl.className = 'group';  // collapsible 제거 (이제 트리 부모가 펼침 처리)
+
+  // 헤더 (간단하게 - 과목·교재만 표시, 단원 정보는 부모에 있음)
+  var contentHtml = '';
+  var sbParts = [];
+  if (g.subject) sbParts.push(g.subject);
+  if (g.book) sbParts.push(g.book);
+  if (sbParts.length > 0) {
+    contentHtml += '<div class="group-subject">' + escapeHtml(sbParts.join(' · ')) + '</div>';
+  }
+  contentHtml +=
+    '<div class="group-title">문제 목록' +
+    '<span class="group-check-badge zero" data-badge-idx="' + gIdx + '">0</span>' +
+    '</div>';
+
+  var headerEl = document.createElement('div');
+  headerEl.className = 'group-header';
+  headerEl.innerHTML =
+    '<div class="group-header-content">' + contentHtml + '</div>' +
+    '<label class="group-select-all" data-group-idx="' + gIdx + '">' +
+      '<input type="checkbox" class="group-all-cb">' +
+      '<span>모두</span>' +
+    '</label>';
+  groupEl.appendChild(headerEl);
+
+  // 문제 목록 (항상 펼친 상태로)
+  var listEl = document.createElement('div');
+  listEl.className = 'problem-list';
+  var itemsInGroup = [];
+
+  for (var i = 0; i < g.problems.length; i++) {
+    (function(p) {
+      var item = document.createElement('label');
+      item.className = 'problem-item';
+      item.innerHTML =
+        '<input type="checkbox" data-id="' + escapeAttr(p.id) + '">' +
+        '<span class="problem-num">' + escapeHtml(p.num || '(번호없음)') + '</span>' +
+        (p.diff ? '<span class="problem-diff">' + escapeHtml(p.diff) + '</span>' : '') +
+        (p.page ? '<span class="problem-page">p.' + escapeHtml(p.page) + '</span>' : '');
+      var cb = item.querySelector('input');
+      cb.addEventListener('change', function() {
+        if (cb.checked) {
+          if (!checkedIds[p.id]) { checkedIds[p.id] = true; checkedCount++; }
+          item.classList.add('checked');
+        } else {
+          if (checkedIds[p.id]) { delete checkedIds[p.id]; checkedCount--; }
+          item.classList.remove('checked');
+        }
+        updateCheckedCount();
+        updateGroupAllState(gIdx);
+        updateGroupBadge(gIdx);
+        updateSummary();
+      });
+      listEl.appendChild(item);
+      itemsInGroup.push({ cb: cb, item: item, id: p.id });
+    })(g.problems[i]);
+  }
+  groupEl.appendChild(listEl);
+  container.appendChild(groupEl);
+
+  // 전체선택 핸들러
+  var groupAllLabel = headerEl.querySelector('.group-select-all');
+  var groupAllCb = headerEl.querySelector('.group-all-cb');
+  groupAllCb.addEventListener('change', function() {
+    var on = groupAllCb.checked;
+    for (var j = 0; j < itemsInGroup.length; j++) {
+      var it = itemsInGroup[j];
+      it.cb.checked = on;
+      if (on) {
+        if (!checkedIds[it.id]) { checkedIds[it.id] = true; checkedCount++; }
+        it.item.classList.add('checked');
+      } else {
+        if (checkedIds[it.id]) { delete checkedIds[it.id]; checkedCount--; }
+        it.item.classList.remove('checked');
+      }
+    }
+    groupAllLabel.classList.toggle('all-checked', on);
+    updateCheckedCount();
+    updateGroupBadge(gIdx);
+    updateSummary();
+  });
+  // 전체선택 라벨 클릭이 아코디언 토글과 충돌하지 않도록
+  groupAllLabel.addEventListener('click', function(e) { e.stopPropagation(); });
+
+  groupItemRegistry[gIdx] = {
+    itemsInGroup: itemsInGroup,
+    groupAllLabel: groupAllLabel,
+    groupAllCb: groupAllCb,
+    groupEl: groupEl
+  };
+}
+
+function updateGroupBadge(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var count = 0;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) count++;
+  }
+  var badge = reg.groupEl.querySelector('.group-check-badge');
+  if (badge) {
+    badge.textContent = count;
+    badge.classList.toggle('zero', count === 0);
+  }
+  // 부모 단원 노드들의 배지도 업데이트
+  updateAllUnitBadges();
+}
+
+// 모든 단원 노드의 합계 배지 갱신
+function updateAllUnitBadges() {
+  if (!window.unitNodeRegistry) return;
+  for (var i = 0; i < window.unitNodeRegistry.length; i++) {
+    var reg = window.unitNodeRegistry[i];
+    var total = countCheckedInUnit(reg.node);
+    var badge = reg.el.querySelector(':scope > .unit-header .unit-check-badge');
+    if (badge) {
+      badge.textContent = total;
+      badge.classList.toggle('zero', total === 0);
+    }
+  }
+}
+
+// 단원 노드에 속한 모든 체크 수 합산 (재귀)
+function countCheckedInUnit(node) {
+  var sum = 0;
+  // 직접 매달린 그룹들
+  for (var i = 0; i < node.groupIndices.length; i++) {
+    var gIdx = node.groupIndices[i];
+    var reg = groupItemRegistry[gIdx];
+    if (reg) {
+      for (var j = 0; j < reg.itemsInGroup.length; j++) {
+        if (reg.itemsInGroup[j].cb.checked) sum++;
+      }
+    }
+  }
+  // 자식 노드들
+  for (var k = 0; k < node.children.length; k++) {
+    sum += countCheckedInUnit(node.children[k]);
+  }
+  return sum;
+}
+
+function updateGroupAllState(gIdx) {
+  var reg = groupItemRegistry[gIdx];
+  if (!reg) return;
+  var allChecked = true;
+  var anyChecked = false;
+  for (var i = 0; i < reg.itemsInGroup.length; i++) {
+    if (reg.itemsInGroup[i].cb.checked) anyChecked = true;
+    else allChecked = false;
+  }
+  reg.groupAllCb.checked = allChecked;
+  try { reg.groupAllCb.indeterminate = !allChecked && anyChecked; } catch (e) {}
+  reg.groupAllLabel.classList.toggle('all-checked', allChecked);
+}
+
+// ===== 결과 파일 제출 =====
+function submitFile() {
+  var checkedIdList = Object.keys(checkedIds);
+  if (checkedIdList.length === 0) {
+    if (!confirm('체크한 문제가 없습니다. 그래도 제출하시겠습니까?')) return;
+  }
+  var commentBox = document.getElementById('commentBox');
+  var comment = commentBox.classList.contains('placeholder') ? '' : commentBox.value.trim();
+
+  // 체크된 문제들의 단원 자동 추출 (선생님 참고용)
+  var checkedUnitsSet = {};  // key → 객체
+  for (var ci = 0; ci < checkedIdList.length; ci++) {
+    var pid = checkedIdList[ci];
+    // DATA.groups 에서 해당 problem을 찾음
+    for (var gi = 0; gi < DATA.groups.length; gi++) {
+      var g = DATA.groups[gi];
+      var found = false;
+      for (var pi = 0; pi < g.problems.length; pi++) {
+        if (String(g.problems[pi].id) === String(pid)) {
+          var unitKey = (g.unit1 || '') + '|' + (g.unit2 || '') + '|' + (g.unit3 || '');
+          if (!checkedUnitsSet[unitKey]) {
+            checkedUnitsSet[unitKey] = {
+              unit1: g.unit1 || '',
+              unit2: g.unit2 || '',
+              unit3: g.unit3 || '',
+              count: 0
+            };
+          }
+          checkedUnitsSet[unitKey].count++;
+          found = true;
+          break;
+        }
+      }
+      if (found) break;
+    }
+  }
+  var checkedUnits = [];
+  for (var k in checkedUnitsSet) checkedUnits.push(checkedUnitsSet[k]);
+
+  var now = new Date();
+  var yyyy = now.getFullYear();
+  var mm = String(now.getMonth() + 1);
+  if (mm.length < 2) mm = '0' + mm;
+  var dd = String(now.getDate());
+  if (dd.length < 2) dd = '0' + dd;
+  var dateStr = yyyy + mm + dd;
+
+  var result = {
+    type: 'wrong-note-submission',
+    version: 2,
+    studentName: DATA.studentName,
+    suffix: DATA.suffix,
+    submittedAt: now.toISOString(),
+    originalCreatedAt: DATA.createdAt,
+    checkedIds: checkedIdList,
+    comment: comment,
+    checkedUnits: checkedUnits
+  };
+
+  var safeName = (DATA.studentName || '학생').replace(/[\/\\:*?"<>|]/g, '_');
+  var safeSuffix = DATA.suffix ? '_' + DATA.suffix.replace(/[\/\\:*?"<>|]/g, '_') : '';
+  var filename = '오답제출_' + safeName + safeSuffix + '_' + dateStr + '.json';
+  var jsonText = JSON.stringify(result, null, 2);
+
+  // 모바일에서 Web Share API 시도
+  var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  try {
+    if (isMobile && window.File && navigator.canShare) {
+      var file = new File([jsonText], filename, { type: 'application/json' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: '오답 제출 - ' + (DATA.studentName || ''),
+          text: filename
+        }).then(function() {
+          showToast('공유 완료!');
+        }).catch(function(err) {
+          if (err && err.name === 'AbortError') return;
+          fallbackDownload(jsonText, filename, isMobile);
+        });
+        return;
+      }
+    }
+  } catch (e) {}
+
+  fallbackDownload(jsonText, filename, isMobile);
+}
+
+function showSendGuide(filename, isMobile) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:16px;max-width:420px;width:100%;padding:24px;';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:20px;font-weight:700;margin-bottom:6px;';
+  title.textContent = '결과 파일이 저장됐어요!';
+
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:14px;color:#555;margin-bottom:16px;';
+  sub.textContent = '이제 선생님께 보내기만 하면 끝이에요.';
+
+  var ol = document.createElement('ol');
+  ol.style.cssText = 'margin:0 0 18px;padding-left:22px;line-height:1.9;font-size:15px;';
+  var steps = isMobile
+    ? ['파일이 저장됐어요.', '저장된 파일을 카카오톡으로 선생님께 전송해주세요. ("파일" 앱에서 방금 받은 파일을 찾아 공유 → 카카오톡)']
+    : ['방금 다운로드 폴더에 파일이 저장됐어요. (파일명: ' + filename + ')', '이 파일을 카카오톡으로 선생님께 전송해주세요. (카톡 대화창에 끌어다 놓거나, 첨부 → 파일 선택)'];
+  for (var i = 0; i < steps.length; i++) {
+    var li = document.createElement('li');
+    li.textContent = steps[i];
+    ol.appendChild(li);
+  }
+
+  var tip = document.createElement('div');
+  tip.style.cssText = 'background:#f6f2fb;border-radius:10px;padding:12px 14px;font-size:13px;color:#555;margin-bottom:16px;';
+  tip.textContent = '파일을 못 찾겠으면, 카톡으로 "선생님 파일 어떻게 보내요?"라고 물어보세요!';
+
+  var btn = document.createElement('button');
+  btn.style.cssText = 'width:100%;padding:13px;border:none;border-radius:10px;background:#7c5cbf;color:#fff;font-size:15px;font-weight:600;cursor:pointer;';
+  btn.textContent = '확인했어요';
+  btn.onclick = function() { overlay.remove(); };
+
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(ol);
+  box.appendChild(tip);
+  box.appendChild(btn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function fallbackDownload(jsonText, filename, isMobile) {
+  try {
+    var blob = new Blob([jsonText], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    showSendGuide(filename, isMobile);
+  } catch (e) {
+    // 최후 폴백: 텍스트를 화면에 보여주고 복사하도록
+    var fallbackArea = document.createElement('div');
+    fallbackArea.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:white;padding:20px;overflow:auto;z-index:99999;';
+    fallbackArea.innerHTML =
+      '<h2 style="margin-top:0;">다운로드가 안 되는 환경입니다</h2>' +
+      '<p>아래 내용을 모두 선택해서 복사하고, 메모장에 붙여넣기 하여 ' + escapeHtml(filename) + ' 이름으로 저장해주세요.</p>' +
+      '<button onclick="this.parentElement.remove()" style="margin-bottom:10px;">닫기</button>' +
+      '<textarea readonly style="width:100%;height:60vh;font-family:monospace;font-size:11px;">' +
+      escapeHtml(jsonText) + '</textarea>';
+    document.body.appendChild(fallbackArea);
+  }
+}
+
+// ===== 초기화 (DOMContentLoaded 대신 즉시 실행) =====
+function init() {
+  try {
+    initNameScreen();
+    initCommentBox();
+    showScreen('name');
+  } catch (e) {
+    var b = document.getElementById('errorBanner');
+    if (b) {
+      b.style.display = 'block';
+      b.textContent = '초기화 오류: ' + e.message;
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
