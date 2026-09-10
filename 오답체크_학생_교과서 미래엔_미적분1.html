@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>오답 체크</title>
+<style>
+  :root{ --bg:#f4f5f7; --card:#ffffff; --line:#e5e8ee; --ink:#25303f; --sub:#8b95a3; --accent:#34568b; --accent-bg:#eaf0f8; --accent-line:#b9cbe6; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; margin:0; background:var(--bg); color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:760px; margin:0 auto; padding:20px 16px 120px; }
+  .page-head h2{ font-size:21px; font-weight:800; margin:0 0 3px; }
+  .page-head .desc{ color:var(--sub); font-size:13px; }
+  .topbar{ display:flex; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin:14px 0 12px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  .topbar .sel{ font-size:15px; font-weight:700; flex:1; } .topbar .sel b{ color:var(--accent); }
+  .foldbtn{ font-size:13px; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:9px; padding:7px 12px; cursor:pointer; }
+  .disp{ display:flex; gap:6px; margin:0 0 12px; flex-wrap:wrap; }
+  .disp button{ font-size:12px; border:1px solid var(--line); background:#fff; color:var(--sub); border-radius:8px; padding:6px 11px; cursor:pointer; }
+  .disp button.on{ background:var(--accent-bg); border-color:var(--accent-line); color:var(--accent); font-weight:700; }
+  .sec{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 8px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  .sec-h{ font-size:16px; font-weight:800; color:var(--ink); padding:2px 2px 12px; }
+  .mid{ border:1px solid var(--line); border-radius:11px; margin-bottom:8px; overflow:hidden; }
+  .mid-h{ display:flex; align-items:center; gap:9px; padding:13px 14px; cursor:pointer; background:#f1f4f8; }
+  .mid-h .tw{ font-size:11px; color:var(--sub); width:12px; transition:transform .15s; }
+  .mid-h.open .tw{ transform:rotate(90deg); }
+  .mid-h .t{ font-weight:700; font-size:14.5px; flex:1; } .mid-h .c{ font-size:11.5px; color:var(--sub); }
+  .mid-body{ padding:10px 12px 13px; }
+  .selall{ font-size:12px; color:var(--accent); border:1px solid var(--accent-line); background:var(--accent-bg); border-radius:8px; padding:4px 10px; cursor:pointer; }
+  .sub-h{ font-size:12.5px; font-weight:700; color:var(--sub); margin:12px 0 3px 2px; }
+  .probs{ display:grid; grid-template-columns:repeat(3, 1fr); gap:7px; margin-top:9px; }
+  .probs.wide{ grid-template-columns:repeat(2, 1fr); }
+  @media(min-width:560px){ .probs{ grid-template-columns:repeat(5,1fr);} .probs.wide{ grid-template-columns:repeat(4,1fr);} }
+  .chip{ display:inline-flex; align-items:center; justify-content:center; gap:5px; border:1px solid var(--line); border-radius:10px; padding:9px 6px; font-size:14px; cursor:pointer; background:#fff; user-select:none; width:100%; }
+  .chip.on{ background:var(--accent-bg); border-color:var(--accent); color:var(--accent); font-weight:700; }
+  .chip .df{ font-size:10.5px; color:#a9743a; background:#f6ede0; border-radius:5px; padding:0 5px; }
+  .chip.on .df{ color:#8a5a22; background:#e6dcc7; }
+  .chip .pg{ font-size:10.5px; color:var(--sub); } .chip.on .pg{ color:var(--accent); }
+  .cmt-card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-top:6px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  .cmt-card .lbl{ font-size:14px; font-weight:700; margin-bottom:8px; }
+  .cmt{ width:100%; min-height:72px; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; }
+  .footer{ position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.97); border-top:1px solid var(--line); padding:10px 16px; }
+  .footer-inner{ max-width:760px; margin:0 auto; display:flex; align-items:center; gap:12px; }
+  .cnt{ font-size:15px; font-weight:700; } .cnt span{ color:var(--accent); }
+  .btn{ margin-left:auto; background:var(--accent); color:#fff; border:0; border-radius:11px; padding:13px 26px; font-size:16px; font-weight:800; cursor:pointer; }
+  .state{ text-align:center; padding:60px 20px; color:var(--sub); }
+  .done{ text-align:center; padding:56px 20px; } .done .mk{ font-size:52px; } .done h2{ font-size:20px; margin:10px 0 6px; }
+  #toast{ position:fixed; left:50%; bottom:80px; transform:translateX(-50%); background:#25303f; color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; z-index:99999; opacity:0; transition:opacity .2s; pointer-events:none; }
+  #toast.show{ opacity:1; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="footer" id="footer" style="display:none">
+  <div class="footer-inner"><div class="cnt">체크 <span id="cntNum">0</span>문제</div>
+  <button class="btn" id="submitBtn" onclick="submitFile()">제출하기</button></div>
+</div>
+<div id="toast"></div>
+<script>
+var DATA = {"studentName":"","suffix":"교과서 미래엔_미적분1","groups":[{"subject":"미적분1","book":"교과서 미래엔","unit1":"1. 함수의 극한과 연속","unit2":"1. 함수의 극한","unit3":"중단원 마무리 문제","problems":[{"id":"prob_08432","num":"1","diff":"기본","page":"26"},{"id":"prob_08433","num":"2","diff":"기본","page":"26"},{"id":"prob_08434","num":"3","diff":"기본","page":"26"},{"id":"prob_08435","num":"4","diff":"기본","page":"26"},{"id":"prob_08436","num":"5","diff":"기본","page":"27"},{"id":"prob_08437","num":"6","diff":"기본","page":"27"},{"id":"prob_08438","num":"7","diff":"표준","page":"27"},{"id":"prob_08439","num":"8","diff":"표준","page":"27"},{"id":"prob_08440","num":"9","diff":"표준","page":"27"},{"id":"prob_08441","num":"10","diff":"표준","page":"27"},{"id":"prob_08442","num":"11","diff":"표준","page":"27"},{"id":"prob_08443","num":"12","diff":"표준","page":"28"},{"id":"prob_08444","num":"13","diff":"표준","page":"28"},{"id":"prob_08445","num":"14","diff":"표준","page":"28"},{"id":"prob_08446","num":"15","diff":"표준","page":"28"},{"id":"prob_08447","num":"16","diff":"표준","page":"28"},{"id":"prob_08448","num":"17","diff":"표준","page":"28"},{"id":"prob_08449","num":"18","diff":"표준","page":"28"},{"id":"prob_08450","num":"19","diff":"발전","page":"29"},{"id":"prob_08451","num":"20","diff":"발전","page":"29"},{"id":"prob_08452","num":"21","diff":"발전","page":"29"},{"id":"prob_08453","num":"22","diff":"발전","page":"29"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"1. 함수의 극한과 연속","unit2":"2. 함수의 연속","unit3":"중단원 마무리 문제","problems":[{"id":"prob_08454","num":"1","diff":"기본","page":"43"},{"id":"prob_08455","num":"2","diff":"기본","page":"43"},{"id":"prob_08456","num":"3","diff":"기본","page":"43"},{"id":"prob_08458","num":"4","diff":"기본","page":"43"},{"id":"prob_08457","num":"5","diff":"기본","page":"44"},{"id":"prob_08459","num":"6","diff":"표준","page":"44"},{"id":"prob_08460","num":"7","diff":"표준","page":"44"},{"id":"prob_08461","num":"8","diff":"표준","page":"44"},{"id":"prob_08462","num":"9","diff":"표준","page":"44"},{"id":"prob_08463","num":"10","diff":"표준","page":"44"},{"id":"prob_08464","num":"11","diff":"표준","page":"45"},{"id":"prob_08465","num":"12","diff":"표준","page":"45"},{"id":"prob_08466","num":"13","diff":"표준","page":"45"},{"id":"prob_08467","num":"14","diff":"표준","page":"45"},{"id":"prob_08468","num":"15","diff":"표준","page":"45"},{"id":"prob_08469","num":"16","diff":"표준","page":"45"},{"id":"prob_08470","num":"17","diff":"발전","page":"46"},{"id":"prob_08471","num":"18","diff":"발전","page":"46"},{"id":"prob_08472","num":"19","diff":"발전","page":"46"},{"id":"prob_08473","num":"20","diff":"발전","page":"46"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"1. 함수의 극한과 연속","unit2":"3. 대단원 평가 문제","unit3":"","problems":[{"id":"prob_08474","num":"1","diff":"●○○","page":"48"},{"id":"prob_08475","num":"2","diff":"●●○","page":"48"},{"id":"prob_08476","num":"3","diff":"●●○","page":"48"},{"id":"prob_08477","num":"4","diff":"●○○","page":"48"},{"id":"prob_08478","num":"5","diff":"●●○","page":"48"},{"id":"prob_08479","num":"6","diff":"●●○","page":"48"},{"id":"prob_08480","num":"7","diff":"●●○","page":"48"},{"id":"prob_08481","num":"8","diff":"●●○","page":"49"},{"id":"prob_08482","num":"9","diff":"●●○","page":"49"},{"id":"prob_08483","num":"10","diff":"●●●","page":"49"},{"id":"prob_08484","num":"11","diff":"●●○","page":"49"},{"id":"prob_08485","num":"12","diff":"●●○","page":"49"},{"id":"prob_08486","num":"13","diff":"●●○","page":"49"},{"id":"prob_08634","num":"14","diff":"●●○","page":"49"},{"id":"prob_08635","num":"15","diff":"●●○","page":"50"},{"id":"prob_08636","num":"16","diff":"●●○","page":"50"},{"id":"prob_08637","num":"17","diff":"●●●","page":"50"},{"id":"prob_08638","num":"18","diff":"●●○","page":"50"},{"id":"prob_08639","num":"19","diff":"●●○","page":"50"},{"id":"prob_08640","num":"20","diff":"●●○","page":"50"},{"id":"prob_08641","num":"21","diff":"●●○","page":"51"},{"id":"prob_08642","num":"22","diff":"●●●","page":"51"},{"id":"prob_08643","num":"23","diff":"●●●","page":"51"},{"id":"prob_08644","num":"24","diff":"●●○","page":"51"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"2. 미분","unit2":"1. 미분계수와 도함수","unit3":"중단원 마무리 문제","problems":[{"id":"prob_08498","num":"1","diff":"기본","page":"72"},{"id":"prob_08499","num":"2","diff":"기본","page":"72"},{"id":"prob_08501","num":"3","diff":"기본","page":"72"},{"id":"prob_08502","num":"4","diff":"기본","page":"72"},{"id":"prob_08503","num":"5","diff":"기본","page":"72"},{"id":"prob_08504","num":"6","diff":"기본","page":"73"},{"id":"prob_08505","num":"7","diff":"표준","page":"73"},{"id":"prob_08506","num":"8","diff":"표준","page":"73"},{"id":"prob_08507","num":"9","diff":"표준","page":"73"},{"id":"prob_08508","num":"10","diff":"표준","page":"73"},{"id":"prob_08509","num":"11","diff":"표준","page":"73"},{"id":"prob_08510","num":"12","diff":"표준","page":"74"},{"id":"prob_08511","num":"13","diff":"표준","page":"74"},{"id":"prob_08513","num":"14","diff":"표준","page":"74"},{"id":"prob_08514","num":"15","diff":"표준","page":"74"},{"id":"prob_08515","num":"16","diff":"표준","page":"74"},{"id":"prob_08516","num":"17","diff":"표준","page":"74"},{"id":"prob_08517","num":"18","diff":"발전","page":"75"},{"id":"prob_08518","num":"19","diff":"발전","page":"75"},{"id":"prob_08519","num":"20","diff":"발전","page":"75"},{"id":"prob_08520","num":"21","diff":"발전","page":"75"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"2. 미분","unit2":"2. 도함수의 활용","unit3":"중단원 마무리 문제","problems":[{"id":"prob_08523","num":"1","diff":"기본","page":"105"},{"id":"prob_08524","num":"2","diff":"기본","page":"105"},{"id":"prob_08525","num":"3","diff":"기본","page":"105"},{"id":"prob_08526","num":"4","diff":"기본","page":"105"},{"id":"prob_08527","num":"5","diff":"기본","page":"106"},{"id":"prob_08528","num":"6","diff":"기본","page":"106"},{"id":"prob_08529","num":"7","diff":"표준","page":"106"},{"id":"prob_08530","num":"8","diff":"표준","page":"106"},{"id":"prob_08531","num":"9","diff":"표준","page":"106"},{"id":"prob_08532","num":"10","diff":"표준","page":"106"},{"id":"prob_08533","num":"11","diff":"표준","page":"106"},{"id":"prob_08534","num":"12","diff":"표준","page":"107"},{"id":"prob_08535","num":"13","diff":"표준","page":"107"},{"id":"prob_08536","num":"14","diff":"표준","page":"107"},{"id":"prob_08537","num":"15","diff":"표준","page":"107"},{"id":"prob_08538","num":"16","diff":"표준","page":"107"},{"id":"prob_08539","num":"17","diff":"표준","page":"107"},{"id":"prob_08540","num":"18","diff":"표준","page":"107"},{"id":"prob_08541","num":"19","diff":"발전","page":"108"},{"id":"prob_08542","num":"20","diff":"발전","page":"108"},{"id":"prob_08543","num":"21","diff":"발전","page":"108"},{"id":"prob_08544","num":"22","diff":"발전","page":"108"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"2. 미분","unit2":"3. 대단원 평가 문제","unit3":"","problems":[{"id":"prob_08545","num":"1","diff":"●○○","page":"110"},{"id":"prob_08546","num":"2","diff":"●●○","page":"110"},{"id":"prob_08547","num":"3","diff":"●●○","page":"110"},{"id":"prob_08548","num":"4","diff":"●●○","page":"110"},{"id":"prob_08549","num":"5","diff":"●●○","page":"110"},{"id":"prob_08550","num":"6","diff":"●○○","page":"110"},{"id":"prob_08551","num":"7","diff":"●●○","page":"111"},{"id":"prob_08552","num":"8","diff":"●●●","page":"111"},{"id":"prob_08553","num":"9","diff":"●●○","page":"111"},{"id":"prob_08554","num":"10","diff":"●●○","page":"111"},{"id":"prob_08555","num":"11","diff":"●●○","page":"111"},{"id":"prob_08556","num":"12","diff":"●●●","page":"111"},{"id":"prob_08557","num":"13","diff":"●●○","page":"111"},{"id":"prob_08558","num":"14","diff":"●●○","page":"112"},{"id":"prob_08559","num":"15","diff":"●●●","page":"112"},{"id":"prob_08560","num":"16","diff":"●●●","page":"112"},{"id":"prob_08561","num":"17","diff":"●●○","page":"112"},{"id":"prob_08562","num":"18","diff":"●●○","page":"112"},{"id":"prob_08563","num":"19","diff":"●●○","page":"112"},{"id":"prob_08564","num":"20","diff":"●●○","page":"113"},{"id":"prob_08565","num":"21","diff":"●●●","page":"113"},{"id":"prob_08566","num":"22","diff":"●●○","page":"113"},{"id":"prob_08567","num":"23","diff":"●●●","page":"113"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"3. 적분","unit2":"1. 부정적분과 정적분","unit3":"중단원 마무리 문제","problems":[{"id":"prob_08568","num":"1","diff":"기본","page":"133"},{"id":"prob_08569","num":"2","diff":"기본","page":"133"},{"id":"prob_08570","num":"3","diff":"기본","page":"133"},{"id":"prob_08571","num":"4","diff":"기본","page":"133"},{"id":"prob_08572","num":"5","diff":"기본","page":"134"},{"id":"prob_08573","num":"6","diff":"표준","page":"134"},{"id":"prob_08574","num":"7","diff":"표준","page":"134"},{"id":"prob_08575","num":"8","diff":"표준","page":"134"},{"id":"prob_08576","num":"9","diff":"표준","page":"134"},{"id":"prob_08577","num":"10","diff":"표준","page":"134"},{"id":"prob_08578","num":"11","diff":"표준","page":"134"},{"id":"prob_08579","num":"12","diff":"표준","page":"135"},{"id":"prob_08580","num":"13","diff":"표준","page":"135"},{"id":"prob_08581","num":"14","diff":"표준","page":"135"},{"id":"prob_08582","num":"15","diff":"표준","page":"135"},{"id":"prob_08583","num":"16","diff":"표준","page":"135"},{"id":"prob_08584","num":"17","diff":"표준","page":"135"},{"id":"prob_08585","num":"18","diff":"발전","page":"136"},{"id":"prob_08586","num":"19","diff":"발전","page":"136"},{"id":"prob_08587","num":"20","diff":"발전","page":"136"},{"id":"prob_08588","num":"21","diff":"발전","page":"136"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"3. 적분","unit2":"2. 정적분의 활용","unit3":"중단원 마무리 문제","problems":[{"id":"prob_08589","num":"1","diff":"기본","page":"150"},{"id":"prob_08590","num":"2","diff":"기본","page":"150"},{"id":"prob_08591","num":"3","diff":"기본","page":"150"},{"id":"prob_08592","num":"4","diff":"기본","page":"150"},{"id":"prob_08593","num":"5","diff":"기본","page":"151"},{"id":"prob_08594","num":"6","diff":"표준","page":"151"},{"id":"prob_08595","num":"7","diff":"표준","page":"151"},{"id":"prob_08596","num":"8","diff":"표준","page":"151"},{"id":"prob_08597","num":"9","diff":"표준","page":"151"},{"id":"prob_08598","num":"10","diff":"표준","page":"151"},{"id":"prob_08599","num":"11","diff":"표준","page":"151"},{"id":"prob_08600","num":"12","diff":"표준","page":"152"},{"id":"prob_08601","num":"13","diff":"표준","page":"152"},{"id":"prob_08602","num":"14","diff":"표준","page":"152"},{"id":"prob_08603","num":"15","diff":"표준","page":"152"},{"id":"prob_08604","num":"16","diff":"표준","page":"152"},{"id":"prob_08605","num":"17","diff":"표준","page":"152"},{"id":"prob_08606","num":"18","diff":"발전","page":"153"},{"id":"prob_08607","num":"19","diff":"발전","page":"153"},{"id":"prob_08608","num":"20","diff":"발전","page":"153"},{"id":"prob_08609","num":"21","diff":"발전","page":"153"}]},{"subject":"미적분1","book":"교과서 미래엔","unit1":"3. 적분","unit2":"3. 대단원 평가 문제","unit3":"","problems":[{"id":"prob_08610","num":"1","diff":"●○○","page":"155"},{"id":"prob_08611","num":"2","diff":"●○○","page":"155"},{"id":"prob_08612","num":"3","diff":"●○○","page":"155"},{"id":"prob_08613","num":"4","diff":"●●○","page":"155"},{"id":"prob_08614","num":"5","diff":"●●○","page":"155"},{"id":"prob_08615","num":"6","diff":"●●○","page":"155"},{"id":"prob_08616","num":"7","diff":"●●○","page":"156"},{"id":"prob_08617","num":"8","diff":"●●○","page":"156"},{"id":"prob_08618","num":"9","diff":"●●○","page":"156"},{"id":"prob_08619","num":"10","diff":"●●○","page":"156"},{"id":"prob_08620","num":"11","diff":"●●○","page":"156"},{"id":"prob_08621","num":"12","diff":"●●●","page":"156"},{"id":"prob_08622","num":"13","diff":"●●○","page":"156"},{"id":"prob_08623","num":"14","diff":"●●○","page":"157"},{"id":"prob_08624","num":"15","diff":"●●●","page":"157"},{"id":"prob_08625","num":"16","diff":"●●●","page":"157"},{"id":"prob_08626","num":"17","diff":"●●○","page":"157"},{"id":"prob_08627","num":"18","diff":"●●○","page":"157"},{"id":"prob_08628","num":"19","diff":"●●○","page":"157"},{"id":"prob_08629","num":"20","diff":"●●●","page":"157"},{"id":"prob_08630","num":"21","diff":"●●○","page":"158"},{"id":"prob_08631","num":"22","diff":"●●●","page":"158"},{"id":"prob_08632","num":"23","diff":"●●○","page":"158"},{"id":"prob_08633","num":"24","diff":"●●○","page":"158"}]}],"totalCount":198,"createdAt":"2026-09-10T02:07:19.430Z"};
+(function(){
+  var urlName=(new URLSearchParams(location.search).get('name')||'').trim();
+  if(urlName) DATA.studentName=urlName;
+})();
+var checkedIds = {};
+var DISP='nd';
+try{ var _d=localStorage.getItem('checkDisp'); if(_d==='nd'||_d==='np'||_d==='ndp') DISP=_d; }catch(e){}
+var savedComment='';
+var app=document.getElementById('app');
+var footer=document.getElementById('footer');
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function showToast(m){ var t=document.getElementById('toast'); if(!t)return; t.textContent=m; t.classList.add('show'); clearTimeout(window.__tt); window.__tt=setTimeout(function(){t.classList.remove('show');},1800); }
+function updateCount(){ var n=0; for(var k in checkedIds) if(checkedIds[k]) n++; var el=document.getElementById('cntNum'); if(el) el.textContent=n; var s=document.getElementById('selCnt'); if(s) s.textContent=n; }
+
+function buildTree(groups){
+  var roots=[], rmap={};
+  (groups||[]).forEach(function(g){
+    var u1=g.unit1||'(단원 미지정)', u2=g.unit2||'', u3=g.unit3||'';
+    if(!rmap[u1]){ rmap[u1]={name:u1,kids:{},karr:[],probs:[]}; roots.push(rmap[u1]); }
+    var n1=rmap[u1];
+    if(!u2){ n1.probs=n1.probs.concat(g.problems||[]); return; }
+    if(!n1.kids[u2]){ n1.kids[u2]={name:u2,kids:{},karr:[],probs:[]}; n1.karr.push(n1.kids[u2]); }
+    var n2=n1.kids[u2];
+    if(!u3){ n2.probs=n2.probs.concat(g.problems||[]); return; }
+    if(!n2.kids[u3]){ n2.kids[u3]={name:u3,kids:{},karr:[],probs:[]}; n2.karr.push(n2.kids[u3]); }
+    n2.kids[u3].probs=n2.kids[u3].probs.concat(g.problems||[]);
+  });
+  return roots;
+}
+function chipInner(p){
+  var s=esc(p.num||'?');
+  if((DISP==='nd'||DISP==='ndp') && p.diff) s+='<span class="df">'+esc(p.diff)+'</span>';
+  if((DISP==='np'||DISP==='ndp') && p.page) s+='<span class="pg">p.'+esc(p.page)+'</span>';
+  return s;
+}
+function chipHtml(p){ return '<button class="chip'+(checkedIds[p.id]?' on':'')+'" data-id="'+esc(p.id)+'">'+chipInner(p)+'</button>'; }
+
+var midStore={};
+function renderCheck(){
+  var groups=DATA.groups||[];
+  var roots=buildTree(groups);
+  var g0=groups[0]||{};
+  var label=[g0.subject,g0.book].filter(Boolean).join(' · ');
+  midStore={}; var midIdx=0;
+  var h='<div class="page-head"><h2>'+(DATA.studentName?esc(DATA.studentName)+' 학생의 오답 체크':'오답 체크')+'</h2>'
+    +'<div class="desc">'+(label?esc(label)+' — ':'')+'단원을 눌러 펼친 후, 틀린 문제를 체크하세요</div></div>';
+  if(!roots.length){ h+='<div class="state">문제가 없습니다.</div>'; app.innerHTML=h; footer.style.display='none'; return; }
+  h+='<div class="topbar"><div class="sel">선택된 문제 <b id="selCnt">0</b>개</div><button class="foldbtn" id="foldAll">모두 펼치기</button></div>';
+  h+='<div class="disp">'
+    +'<button data-d="nd" class="'+(DISP==='nd'?'on':'')+'">번호·난이도</button>'
+    +'<button data-d="np" class="'+(DISP==='np'?'on':'')+'">번호·페이지</button>'
+    +'<button data-d="ndp" class="'+(DISP==='ndp'?'on':'')+'">번호·난이도·페이지</button>'
+    +'</div>';
+  roots.forEach(function(u1){
+    h+='<div class="sec"><div class="sec-h">'+esc(u1.name)+'</div>';
+    var mids=[];
+    if(u1.probs && u1.probs.length) mids.push({ name:'전체 문제', probs:u1.probs, subs:[] });
+    u1.karr.forEach(function(u2){ mids.push({ name:u2.name, probs:u2.probs, subs:u2.karr }); });
+    mids.forEach(function(m){
+      var mid='m'+(midIdx++);
+      var all=[].concat(m.probs||[]); (m.subs||[]).forEach(function(u3){ all=all.concat(u3.probs||[]); });
+      midStore[mid]=all.map(function(p){return p.id;});
+      h+='<div class="mid"><div class="mid-h" data-mid="'+mid+'"><span class="tw">&#9654;</span><span class="t">'+esc(m.name)+'</span><span class="c">'+all.length+'문제</span></div>';
+      h+='<div class="mid-body" id="body-'+mid+'" style="display:none">';
+      h+='<button class="selall" data-selall="'+mid+'">이 단원 전체 선택</button>';
+      var wide=(DISP==='ndp'?' wide':'');
+      if(m.probs && m.probs.length) h+='<div class="probs'+wide+'">'+m.probs.map(chipHtml).join('')+'</div>';
+      (m.subs||[]).forEach(function(u3){
+        h+='<div class="sub-h">'+esc(u3.name)+'</div><div class="probs'+wide+'">'+(u3.probs||[]).map(chipHtml).join('')+'</div>';
+      });
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  h+='<div class="cmt-card"><div class="lbl">선생님께 전하고 싶은 말</div>'
+    +'<textarea class="cmt" id="cmt" placeholder="이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요."></textarea></div>';
+  app.innerHTML=h; footer.style.display=''; updateCount();
+  var _c=document.getElementById('cmt'); if(_c){ _c.value=savedComment; _c.addEventListener('input',function(){ savedComment=_c.value; }); }
+  app.querySelectorAll('.disp button').forEach(function(b){ b.onclick=function(){ var c=document.getElementById('cmt'); if(c) savedComment=c.value; DISP=b.dataset.d; try{ localStorage.setItem('checkDisp',DISP);}catch(e){} renderCheck(); }; });
+  app.querySelectorAll('.mid-h').forEach(function(hd){ hd.onclick=function(e){ if(e.target.closest('[data-selall]'))return; var body=document.getElementById('body-'+hd.dataset.mid); var open=body.style.display!=='none'; body.style.display=open?'none':''; hd.classList.toggle('open',!open); }; });
+  app.querySelectorAll('.chip').forEach(function(c){ c.onclick=function(){ var id=c.dataset.id; if(checkedIds[id]){ delete checkedIds[id]; c.classList.remove('on'); } else { checkedIds[id]=true; c.classList.add('on'); } updateCount(); }; });
+  app.querySelectorAll('[data-selall]').forEach(function(b){ b.onclick=function(){ var ids=midStore[b.dataset.selall]||[]; var allOn=ids.every(function(id){return checkedIds[id];}); ids.forEach(function(id){ if(allOn) delete checkedIds[id]; else checkedIds[id]=true; }); var body=document.getElementById('body-'+b.dataset.selall); if(body) body.querySelectorAll('.chip').forEach(function(c){ c.classList.toggle('on', !!checkedIds[c.dataset.id]); }); updateCount(); }; });
+  var fold=document.getElementById('foldAll');
+  if(fold) fold.onclick=function(){ var bodies=app.querySelectorAll('.mid-body'); var anyClosed=Array.prototype.some.call(bodies,function(b){return b.style.display==='none';}); bodies.forEach(function(b){ b.style.display=anyClosed?'':'none'; }); app.querySelectorAll('.mid-h').forEach(function(hd){ hd.classList.toggle('open', anyClosed); }); fold.textContent=anyClosed?'모두 접기':'모두 펼치기'; };
+}
+
+function submitFile(){
+  var ids=Object.keys(checkedIds).filter(function(k){return checkedIds[k];});
+  if(!ids.length){ if(!confirm('체크한 문제가 없습니다. 그래도 제출할까요?')) return; }
+  var comment=(document.getElementById('cmt')&&document.getElementById('cmt').value||'').trim();
+  var uset={};
+  (DATA.groups||[]).forEach(function(g){ (g.problems||[]).forEach(function(p){ if(checkedIds[p.id]){ var k=(g.unit1||'')+'|'+(g.unit2||'')+'|'+(g.unit3||''); if(!uset[k]) uset[k]={unit1:g.unit1||'',unit2:g.unit2||'',unit3:g.unit3||'',count:0}; uset[k].count++; } }); });
+  var units=[]; for(var k in uset) units.push(uset[k]);
+  var now=new Date();
+  var mm=String(now.getMonth()+1); if(mm.length<2) mm='0'+mm;
+  var dd=String(now.getDate()); if(dd.length<2) dd='0'+dd;
+  var dateStr=now.getFullYear()+mm+dd;
+  var result={ type:'wrong-note-submission', version:2, studentName:DATA.studentName, suffix:DATA.suffix, submittedAt:now.toISOString(), originalCreatedAt:DATA.createdAt, checkedIds:ids, comment:comment, checkedUnits:units };
+  var safeName=(DATA.studentName||'학생').replace(/[\/\\:*?"<>|]/g,'_');
+  var safeSuffix=DATA.suffix?('_'+DATA.suffix.replace(/[\/\\:*?"<>|]/g,'_')):'';
+  var filename='오답제출_'+safeName+safeSuffix+'_'+dateStr+'.json';
+  var jsonText=JSON.stringify(result,null,2);
+  var isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  try{
+    if(isMobile && window.File && navigator.canShare){
+      var file=new File([jsonText], filename, {type:'application/json'});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({files:[file], title:'오답 제출 - '+(DATA.studentName||''), text:filename})
+          .then(function(){ showToast('공유 완료!'); })
+          .catch(function(err){ if(err&&err.name==='AbortError')return; fallbackDownload(jsonText, filename, isMobile); });
+        return;
+      }
+    }
+  }catch(e){}
+  fallbackDownload(jsonText, filename, isMobile);
+}
+function fallbackDownload(jsonText, filename, isMobile){
+  try{
+    var blob=new Blob([jsonText], {type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    showSendGuide(filename, isMobile);
+  }catch(e){
+    var fa=document.createElement('div');
+    fa.style.cssText='position:fixed;inset:0;background:white;padding:20px;overflow:auto;z-index:99999;';
+    fa.innerHTML='<h2 style="margin-top:0;">다운로드가 안 되는 환경입니다</h2><p>아래 내용을 모두 복사해 메모장에 붙여넣고 '+esc(filename)+' 이름으로 저장해주세요.</p><button onclick="this.parentElement.remove()" style="margin-bottom:10px;">닫기</button><textarea readonly style="width:100%;height:60vh;font-family:monospace;font-size:11px;">'+esc(jsonText)+'</textarea>';
+    document.body.appendChild(fa);
+  }
+}
+function showSendGuide(filename, isMobile){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  var steps=isMobile
+    ? ['파일이 저장됐어요.','저장된 파일을 카카오톡으로 선생님께 전송해주세요. ("파일" 앱에서 방금 받은 파일을 찾아 공유 → 카카오톡)']
+    : ['다운로드 폴더에 파일이 저장됐어요. (파일명: '+filename+')','이 파일을 카카오톡으로 선생님께 전송해주세요. (카톡 대화창에 끌어다 놓거나, 첨부 → 파일 선택)'];
+  var lis=steps.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('');
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:24px;">'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px;">결과 파일이 저장됐어요!</div>'
+    +'<div style="font-size:14px;color:#555;margin-bottom:16px;">이제 선생님께 보내기만 하면 끝이에요.</div>'
+    +'<ol style="margin:0 0 18px;padding-left:22px;line-height:1.9;font-size:15px;">'+lis+'</ol>'
+    +'<div style="background:#eaf0f8;border-radius:10px;padding:12px 14px;font-size:13px;color:#34568b;margin-bottom:16px;">파일을 못 찾겠으면, 카톡으로 "선생님 파일 어떻게 보내요?"라고 물어보세요!</div>'
+    +'<button style="width:100%;padding:13px;border:none;border-radius:10px;background:#34568b;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">확인</button></div>';
+  ov.querySelector('button').onclick=function(){ ov.remove(); };
+  document.body.appendChild(ov);
+}
+
+renderCheck();
+</script>
+</body>
+</html>
