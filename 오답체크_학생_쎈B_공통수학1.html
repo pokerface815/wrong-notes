@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<title>오답 체크</title>
+<style>
+  :root{ --bg:#f4f5f7; --card:#ffffff; --line:#e5e8ee; --ink:#25303f; --sub:#8b95a3; --accent:#34568b; --accent-bg:#eaf0f8; --accent-line:#b9cbe6; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{ font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif; margin:0; background:var(--bg); color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:760px; margin:0 auto; padding:20px 16px 120px; }
+  .page-head h2{ font-size:21px; font-weight:800; margin:0 0 3px; }
+  .page-head .desc{ color:var(--sub); font-size:13px; }
+  .topbar{ display:flex; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin:14px 0 12px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  .topbar .sel{ font-size:15px; font-weight:700; flex:1; } .topbar .sel b{ color:var(--accent); }
+  .foldbtn{ font-size:13px; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:9px; padding:7px 12px; cursor:pointer; }
+  .disp{ display:flex; gap:6px; margin:0 0 12px; flex-wrap:wrap; }
+  .disp button{ font-size:12px; border:1px solid var(--line); background:#fff; color:var(--sub); border-radius:8px; padding:6px 11px; cursor:pointer; }
+  .disp button.on{ background:var(--accent-bg); border-color:var(--accent-line); color:var(--accent); font-weight:700; }
+  .sec{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 8px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  .sec-h{ font-size:16px; font-weight:800; color:var(--ink); padding:2px 2px 12px; }
+  .mid{ border:1px solid var(--line); border-radius:11px; margin-bottom:8px; overflow:hidden; }
+  .mid-h{ display:flex; align-items:center; gap:9px; padding:13px 14px; cursor:pointer; background:#f1f4f8; }
+  .mid-h .tw{ font-size:11px; color:var(--sub); width:12px; transition:transform .15s; }
+  .mid-h.open .tw{ transform:rotate(90deg); }
+  .mid-h .t{ font-weight:700; font-size:14.5px; flex:1; } .mid-h .c{ font-size:11.5px; color:var(--sub); }
+  .mid-body{ padding:10px 12px 13px; }
+  .selall{ font-size:12px; color:var(--accent); border:1px solid var(--accent-line); background:var(--accent-bg); border-radius:8px; padding:4px 10px; cursor:pointer; }
+  .sub-h{ font-size:12.5px; font-weight:700; color:var(--sub); margin:12px 0 3px 2px; }
+  .probs{ display:grid; grid-template-columns:repeat(3, 1fr); gap:7px; margin-top:9px; }
+  .probs.wide{ grid-template-columns:repeat(2, 1fr); }
+  @media(min-width:560px){ .probs{ grid-template-columns:repeat(5,1fr);} .probs.wide{ grid-template-columns:repeat(4,1fr);} }
+  .chip{ display:inline-flex; align-items:center; justify-content:center; gap:5px; border:1px solid var(--line); border-radius:10px; padding:9px 6px; font-size:14px; cursor:pointer; background:#fff; user-select:none; width:100%; }
+  .chip.on{ background:var(--accent-bg); border-color:var(--accent); color:var(--accent); font-weight:700; }
+  .chip .df{ font-size:10.5px; color:#a9743a; background:#f6ede0; border-radius:5px; padding:0 5px; }
+  .chip.on .df{ color:#8a5a22; background:#e6dcc7; }
+  .chip .pg{ font-size:10.5px; color:var(--sub); } .chip.on .pg{ color:var(--accent); }
+  .cmt-card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-top:6px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  .cmt-card .lbl{ font-size:14px; font-weight:700; margin-bottom:8px; }
+  .cmt{ width:100%; min-height:72px; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; }
+  .footer{ position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.97); border-top:1px solid var(--line); padding:10px 16px; }
+  .footer-inner{ max-width:760px; margin:0 auto; display:flex; align-items:center; gap:12px; }
+  .cnt{ font-size:15px; font-weight:700; } .cnt span{ color:var(--accent); }
+  .btn{ margin-left:auto; background:var(--accent); color:#fff; border:0; border-radius:11px; padding:13px 26px; font-size:16px; font-weight:800; cursor:pointer; }
+  .state{ text-align:center; padding:60px 20px; color:var(--sub); }
+  .done{ text-align:center; padding:56px 20px; } .done .mk{ font-size:52px; } .done h2{ font-size:20px; margin:10px 0 6px; }
+  #toast{ position:fixed; left:50%; bottom:80px; transform:translateX(-50%); background:#25303f; color:#fff; padding:10px 18px; border-radius:20px; font-size:14px; z-index:99999; opacity:0; transition:opacity .2s; pointer-events:none; }
+  #toast.show{ opacity:1; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="footer" id="footer" style="display:none">
+  <div class="footer-inner"><div class="cnt">체크 <span id="cntNum">0</span>문제</div>
+  <button class="btn" id="submitBtn" onclick="submitFile()">제출하기</button></div>
+</div>
+<div id="toast"></div>
+<script>
+var DATA = {"studentName":"","suffix":"쎈B_공통수학1","groups":[{"subject":"공통수학1","book":"쎈B","unit1":"1. 다항식","unit2":"1. 다항식의 연산","unit3":"","problems":[{"id":"prob_11622","num":"1","diff":"대표문제","page":"7"},{"id":"prob_11623","num":"2","diff":"하","page":"7"},{"id":"prob_11624","num":"3","diff":"중","page":"7"},{"id":"prob_11625","num":"4","diff":"중","page":"7"},{"id":"prob_11626","num":"5","diff":"중","page":"7"},{"id":"prob_11627","num":"6","diff":"중","page":"7"},{"id":"prob_11628","num":"7","diff":"대표문제","page":"8"},{"id":"prob_11629","num":"8","diff":"하","page":"8"},{"id":"prob_11630","num":"9","diff":"중","page":"8"},{"id":"prob_11631","num":"10","diff":"중","page":"8"},{"id":"prob_11632","num":"11","diff":"중","page":"8"},{"id":"prob_11633","num":"12","diff":"상","page":"8"},{"id":"prob_11634","num":"13","diff":"대표문제","page":"8"},{"id":"prob_11635","num":"14","diff":"하","page":"9"},{"id":"prob_11636","num":"15","diff":"하","page":"9"},{"id":"prob_11637","num":"16","diff":"중","page":"9"},{"id":"prob_11638","num":"17","diff":"중","page":"9"},{"id":"prob_11639","num":"18","diff":"상","page":"9"},{"id":"prob_11640","num":"19","diff":"대표문제","page":"9"},{"id":"prob_11641","num":"20","diff":"중","page":"9"},{"id":"prob_11642","num":"21","diff":"중","page":"10"},{"id":"prob_11643","num":"22","diff":"대표문제","page":"10"},{"id":"prob_11644","num":"23","diff":"하","page":"10"},{"id":"prob_11645","num":"24","diff":"하","page":"10"},{"id":"prob_11646","num":"25","diff":"중","page":"10"},{"id":"prob_11647","num":"26","diff":"중","page":"10"},{"id":"prob_11648","num":"27","diff":"상","page":"11"},{"id":"prob_11649","num":"28","diff":"대표문제","page":"11"},{"id":"prob_11650","num":"29","diff":"중","page":"11"},{"id":"prob_11651","num":"30","diff":"중","page":"11"},{"id":"prob_11652","num":"31","diff":"상","page":"11"},{"id":"prob_11653","num":"32","diff":"대표문제","page":"11"},{"id":"prob_11654","num":"33","diff":"중","page":"12"},{"id":"prob_11655","num":"34","diff":"중","page":"12"},{"id":"prob_11656","num":"35","diff":"상","page":"12"},{"id":"prob_11657","num":"36","diff":"대표문제","page":"12"},{"id":"prob_11658","num":"37","diff":"중","page":"12"},{"id":"prob_11659","num":"38","diff":"중","page":"12"},{"id":"prob_11660","num":"39","diff":"상","page":"12"},{"id":"prob_11661","num":"40","diff":"대표문제","page":"13"},{"id":"prob_11662","num":"41","diff":"하","page":"13"},{"id":"prob_11663","num":"42","diff":"중","page":"13"},{"id":"prob_11664","num":"43","diff":"중","page":"13"},{"id":"prob_11665","num":"44","diff":"대표문제","page":"13"},{"id":"prob_11666","num":"45","diff":"중","page":"13"},{"id":"prob_11667","num":"46","diff":"중","page":"14"},{"id":"prob_11668","num":"47","diff":"상","page":"14"},{"id":"prob_11669","num":"48","diff":"대표문제","page":"14"},{"id":"prob_11670","num":"49","diff":"중","page":"14"},{"id":"prob_11671","num":"50","diff":"상","page":"14"},{"id":"prob_11672","num":"51","diff":"상","page":"14"},{"id":"prob_11673","num":"52","diff":"대표문제","page":"15"},{"id":"prob_11674","num":"53","diff":"중","page":"15"},{"id":"prob_11675","num":"54","diff":"중","page":"15"},{"id":"prob_11676","num":"55","diff":"중","page":"15"},{"id":"prob_11677","num":"56","diff":"중","page":"15"},{"id":"prob_11678","num":"57","diff":"상","page":"15"}]},{"subject":"공통수학1","book":"쎈B","unit1":"1. 다항식","unit2":"2. 나머지 정리와 인수분해","unit3":"","problems":[{"id":"prob_11679","num":"1","diff":"대표문제","page":"17"},{"id":"prob_11680","num":"2","diff":"하","page":"17"},{"id":"prob_11681","num":"3","diff":"중","page":"17"},{"id":"prob_11682","num":"4","diff":"대표문제","page":"17"},{"id":"prob_11683","num":"5","diff":"중","page":"17"},{"id":"prob_11684","num":"6","diff":"중","page":"17"},{"id":"prob_11685","num":"7","diff":"중","page":"18"},{"id":"prob_11686","num":"8","diff":"중","page":"18"},{"id":"prob_11687","num":"9","diff":"대표문제","page":"18"},{"id":"prob_11688","num":"10","diff":"중","page":"18"},{"id":"prob_11689","num":"11","diff":"중","page":"18"},{"id":"prob_11690","num":"12","diff":"상","page":"18"},{"id":"prob_11691","num":"13","diff":"대표문제","page":"19"},{"id":"prob_11692","num":"14","diff":"하","page":"19"},{"id":"prob_11693","num":"15","diff":"중","page":"19"},{"id":"prob_11694","num":"16","diff":"상","page":"19"},{"id":"prob_11695","num":"17","diff":"대표문제","page":"19"},{"id":"prob_11696","num":"18","diff":"중","page":"19"},{"id":"prob_11697","num":"19","diff":"중","page":"19"},{"id":"prob_11698","num":"20","diff":"중","page":"20"},{"id":"prob_11699","num":"21","diff":"대표문제","page":"20"},{"id":"prob_11700","num":"22","diff":"하","page":"20"},{"id":"prob_11701","num":"23","diff":"중","page":"20"},{"id":"prob_11702","num":"24","diff":"대표문제","page":"20"},{"id":"prob_11703","num":"25","diff":"하","page":"20"},{"id":"prob_11704","num":"26","diff":"중","page":"20"},{"id":"prob_11705","num":"27","diff":"중","page":"20"},{"id":"prob_11706","num":"28","diff":"상","page":"21"},{"id":"prob_11707","num":"29","diff":"대표문제","page":"21"},{"id":"prob_11708","num":"30","diff":"중","page":"21"},{"id":"prob_11709","num":"31","diff":"중","page":"21"},{"id":"prob_11710","num":"32","diff":"상","page":"21"},{"id":"prob_11711","num":"33","diff":"대표문제","page":"21"},{"id":"prob_11712","num":"34","diff":"중","page":"22"},{"id":"prob_11713","num":"35","diff":"상","page":"22"},{"id":"prob_11714","num":"36","diff":"대표문제","page":"22"},{"id":"prob_11715","num":"37","diff":"중","page":"22"},{"id":"prob_11716","num":"38","diff":"중","page":"22"},{"id":"prob_11717","num":"39","diff":"중","page":"22"},{"id":"prob_11718","num":"40","diff":"대표문제","page":"22"},{"id":"prob_11719","num":"41","diff":"중","page":"23"},{"id":"prob_11720","num":"42","diff":"중","page":"23"},{"id":"prob_11721","num":"43","diff":"대표문제","page":"23"},{"id":"prob_11722","num":"44","diff":"중","page":"23"},{"id":"prob_11723","num":"45","diff":"중","page":"23"},{"id":"prob_11724","num":"46","diff":"상","page":"23"},{"id":"prob_11725","num":"47","diff":"대표문제","page":"23"},{"id":"prob_11726","num":"48","diff":"중","page":"23"},{"id":"prob_11727","num":"49","diff":"중","page":"24"},{"id":"prob_11728","num":"50","diff":"상","page":"24"},{"id":"prob_11729","num":"51","diff":"대표문제","page":"24"},{"id":"prob_11730","num":"52","diff":"중","page":"24"},{"id":"prob_11731","num":"53","diff":"중","page":"24"},{"id":"prob_11732","num":"54","diff":"중","page":"24"},{"id":"prob_11733","num":"55","diff":"대표문제","page":"24"},{"id":"prob_11734","num":"56","diff":"중","page":"25"},{"id":"prob_11735","num":"57","diff":"중","page":"25"},{"id":"prob_11736","num":"58","diff":"대표문제","page":"25"},{"id":"prob_11737","num":"59","diff":"중","page":"25"},{"id":"prob_11738","num":"60","diff":"중","page":"25"},{"id":"prob_11739","num":"61","diff":"대표문제","page":"25"},{"id":"prob_11740","num":"62","diff":"중","page":"26"},{"id":"prob_11741","num":"63","diff":"중","page":"26"},{"id":"prob_11742","num":"64","diff":"대표문제","page":"26"},{"id":"prob_11743","num":"65","diff":"중","page":"26"},{"id":"prob_11744","num":"66","diff":"중","page":"26"},{"id":"prob_11745","num":"67","diff":"중","page":"26"},{"id":"prob_11746","num":"68","diff":"대표문제","page":"26"},{"id":"prob_11747","num":"69","diff":"하","page":"27"},{"id":"prob_11748","num":"70","diff":"중","page":"27"},{"id":"prob_11749","num":"71","diff":"상","page":"27"},{"id":"prob_11750","num":"72","diff":"대표문제","page":"27"},{"id":"prob_11751","num":"73","diff":"중","page":"27"},{"id":"prob_11752","num":"74","diff":"중","page":"27"},{"id":"prob_11753","num":"75","diff":"상","page":"27"},{"id":"prob_11754","num":"76","diff":"대표문제","page":"28"},{"id":"prob_11755","num":"77","diff":"하","page":"28"},{"id":"prob_11756","num":"78","diff":"중","page":"28"},{"id":"prob_11757","num":"79","diff":"중","page":"28"},{"id":"prob_11758","num":"80","diff":"중","page":"28"},{"id":"prob_11759","num":"81","diff":"상","page":"28"},{"id":"prob_11760","num":"82","diff":"대표문제","page":"28"},{"id":"prob_11761","num":"83","diff":"중","page":"29"},{"id":"prob_11762","num":"84","diff":"중","page":"29"},{"id":"prob_11763","num":"85","diff":"대표문제","page":"29"},{"id":"prob_11764","num":"86","diff":"중","page":"29"},{"id":"prob_11765","num":"87","diff":"대표문제","page":"29"},{"id":"prob_11766","num":"88","diff":"중","page":"29"},{"id":"prob_11767","num":"89","diff":"상","page":"29"},{"id":"prob_11768","num":"90","diff":"대표문제","page":"30"},{"id":"prob_11769","num":"91","diff":"중","page":"30"},{"id":"prob_11770","num":"92","diff":"중","page":"30"},{"id":"prob_11771","num":"93","diff":"상","page":"30"},{"id":"prob_11772","num":"94","diff":"대표문제","page":"30"},{"id":"prob_11773","num":"95","diff":"중","page":"30"},{"id":"prob_11774","num":"96","diff":"중","page":"30"},{"id":"prob_11775","num":"97","diff":"상","page":"30"}]},{"subject":"공통수학1","book":"쎈B","unit1":"2. 방정식","unit2":"3. 복소수","unit3":"","problems":[{"id":"prob_11777","num":"1","diff":"대표문제","page":"33"},{"id":"prob_11778","num":"2","diff":"하","page":"33"},{"id":"prob_11779","num":"3","diff":"대표문제","page":"33"},{"id":"prob_11780","num":"4","diff":"중","page":"33"},{"id":"prob_11781","num":"5","diff":"중","page":"33"},{"id":"prob_11782","num":"6","diff":"중","page":"33"},{"id":"prob_11783","num":"7","diff":"대표문제","page":"34"},{"id":"prob_11784","num":"8","diff":"하","page":"34"},{"id":"prob_11785","num":"9","diff":"중","page":"34"},{"id":"prob_11786","num":"10","diff":"상","page":"34"},{"id":"prob_11787","num":"11","diff":"대표문제","page":"34"},{"id":"prob_11788","num":"12","diff":"중","page":"34"},{"id":"prob_11789","num":"13","diff":"중","page":"34"},{"id":"prob_11790","num":"14","diff":"중","page":"34"},{"id":"prob_11791","num":"15","diff":"중","page":"35"},{"id":"prob_11792","num":"16","diff":"대표문제","page":"35"},{"id":"prob_11793","num":"17","diff":"중","page":"35"},{"id":"prob_11794","num":"18","diff":"중","page":"35"},{"id":"prob_11795","num":"19","diff":"중","page":"35"},{"id":"prob_11796","num":"20","diff":"상","page":"35"},{"id":"prob_11797","num":"21","diff":"대표문제","page":"35"},{"id":"prob_11798","num":"22","diff":"중","page":"36"},{"id":"prob_11799","num":"23","diff":"중","page":"36"},{"id":"prob_11800","num":"24","diff":"중","page":"36"},{"id":"prob_11806","num":"25","diff":"중","page":"36"},{"id":"prob_11807","num":"26","diff":"대표문제","page":"36"},{"id":"prob_11808","num":"27","diff":"하","page":"36"},{"id":"prob_11804","num":"28","diff":"중","page":"36"},{"id":"prob_11805","num":"29","diff":"중","page":"37"},{"id":"prob_11809","num":"30","diff":"상","page":"37"},{"id":"prob_11810","num":"31","diff":"대표문제","page":"37"},{"id":"prob_11811","num":"32","diff":"중","page":"37"},{"id":"prob_11812","num":"33","diff":"중","page":"37"},{"id":"prob_11813","num":"34","diff":"중","page":"37"},{"id":"prob_11814","num":"35","diff":"상","page":"37"},{"id":"prob_11815","num":"36","diff":"대표문제","page":"37"},{"id":"prob_11816","num":"37","diff":"중","page":"38"},{"id":"prob_11817","num":"38","diff":"중","page":"38"},{"id":"prob_11818","num":"39","diff":"중","page":"38"},{"id":"prob_11819","num":"40","diff":"상","page":"38"},{"id":"prob_11820","num":"41","diff":"대표문제","page":"38"},{"id":"prob_11821","num":"42","diff":"중","page":"38"},{"id":"prob_11822","num":"43","diff":"중","page":"38"},{"id":"prob_11823","num":"44","diff":"상","page":"38"},{"id":"prob_11824","num":"45","diff":"상","page":"39"},{"id":"prob_11825","num":"46","diff":"대표문제","page":"39"},{"id":"prob_11826","num":"47","diff":"하","page":"39"},{"id":"prob_11827","num":"48","diff":"중","page":"39"},{"id":"prob_11828","num":"49","diff":"중","page":"39"},{"id":"prob_11829","num":"50","diff":"상","page":"39"},{"id":"prob_11830","num":"51","diff":"대표문제","page":"39"},{"id":"prob_11831","num":"52","diff":"중","page":"40"},{"id":"prob_11832","num":"53","diff":"중","page":"40"},{"id":"prob_11833","num":"54","diff":"상","page":"40"},{"id":"prob_11834","num":"55","diff":"대표문제","page":"40"},{"id":"prob_11835","num":"56","diff":"중","page":"40"},{"id":"prob_11836","num":"57","diff":"중","page":"40"},{"id":"prob_11837","num":"58","diff":"중","page":"40"}]},{"subject":"공통수학1","book":"쎈B","unit1":"2. 방정식","unit2":"4. 이차방정식","unit3":"","problems":[{"id":"prob_11838","num":"1","diff":"대표문제","page":"43"},{"id":"prob_11839","num":"2","diff":"하","page":"43"},{"id":"prob_11840","num":"3","diff":"중","page":"43"},{"id":"prob_11841","num":"4","diff":"중","page":"43"},{"id":"prob_11842","num":"5","diff":"중","page":"43"},{"id":"prob_11843","num":"6","diff":"대표문제","page":"43"},{"id":"prob_11844","num":"7","diff":"하","page":"43"},{"id":"prob_11845","num":"8","diff":"중","page":"44"},{"id":"prob_11846","num":"9","diff":"중","page":"44"},{"id":"prob_11847","num":"10","diff":"중","page":"44"},{"id":"prob_11848","num":"11","diff":"상","page":"44"},{"id":"prob_11849","num":"12","diff":"대표문제","page":"44"},{"id":"prob_11850","num":"13","diff":"중","page":"44"},{"id":"prob_11851","num":"14","diff":"상","page":"44"},{"id":"prob_11852","num":"15","diff":"상","page":"44"},{"id":"prob_11853","num":"16","diff":"대표문제","page":"45"},{"id":"prob_11854","num":"17","diff":"중","page":"45"},{"id":"prob_11855","num":"18","diff":"상","page":"45"},{"id":"prob_11856","num":"19","diff":"대표문제","page":"45"},{"id":"prob_11857","num":"20","diff":"중","page":"45"},{"id":"prob_11858","num":"21","diff":"상","page":"45"},{"id":"prob_11859","num":"22","diff":"상","page":"46"},{"id":"prob_11860","num":"23","diff":"대표문제","page":"46"},{"id":"prob_11861","num":"24","diff":"중","page":"46"},{"id":"prob_11862","num":"25","diff":"중","page":"46"},{"id":"prob_11863","num":"26","diff":"중","page":"46"},{"id":"prob_11864","num":"27","diff":"상","page":"46"},{"id":"prob_11865","num":"28","diff":"대표문제","page":"46"},{"id":"prob_11866","num":"29","diff":"하","page":"46"},{"id":"prob_11867","num":"30","diff":"중","page":"47"},{"id":"prob_11868","num":"31","diff":"중","page":"47"},{"id":"prob_11869","num":"32","diff":"상","page":"47"},{"id":"prob_11870","num":"33","diff":"대표문제","page":"47"},{"id":"prob_11871","num":"34","diff":"하","page":"47"},{"id":"prob_11872","num":"35","diff":"중","page":"47"},{"id":"prob_11873","num":"36","diff":"대표문제","page":"48"},{"id":"prob_11874","num":"37","diff":"중","page":"48"},{"id":"prob_11875","num":"38","diff":"중","page":"48"},{"id":"prob_11876","num":"39","diff":"중","page":"48"},{"id":"prob_11877","num":"40","diff":"대표문제","page":"48"},{"id":"prob_11878","num":"41","diff":"하","page":"48"},{"id":"prob_11879","num":"42","diff":"중","page":"48"},{"id":"prob_11880","num":"43","diff":"상","page":"48"},{"id":"prob_11881","num":"44","diff":"대표문제","page":"49"},{"id":"prob_11882","num":"45","diff":"중","page":"49"},{"id":"prob_11883","num":"46","diff":"중","page":"49"},{"id":"prob_11884","num":"47","diff":"중","page":"49"},{"id":"prob_11885","num":"48","diff":"중","page":"49"},{"id":"prob_11886","num":"49","diff":"상","page":"49"},{"id":"prob_11887","num":"50","diff":"대표문제","page":"49"},{"id":"prob_11888","num":"51","diff":"중","page":"50"},{"id":"prob_11889","num":"52","diff":"중","page":"50"},{"id":"prob_11890","num":"53","diff":"중","page":"50"},{"id":"prob_11891","num":"54","diff":"상","page":"50"},{"id":"prob_11892","num":"55","diff":"대표문제","page":"50"},{"id":"prob_11893","num":"56","diff":"중","page":"50"},{"id":"prob_11894","num":"57","diff":"중","page":"50"},{"id":"prob_11895","num":"58","diff":"중","page":"51"},{"id":"prob_11896","num":"59","diff":"상","page":"51"},{"id":"prob_11897","num":"60","diff":"대표문제","page":"51"},{"id":"prob_11898","num":"61","diff":"중","page":"51"},{"id":"prob_11899","num":"62","diff":"중","page":"51"},{"id":"prob_11900","num":"63","diff":"대표문제","page":"51"},{"id":"prob_11901","num":"64","diff":"중","page":"52"},{"id":"prob_11902","num":"65","diff":"중","page":"52"},{"id":"prob_11903","num":"66","diff":"중","page":"52"},{"id":"prob_11904","num":"67","diff":"상","page":"52"},{"id":"prob_11905","num":"68","diff":"대표문제","page":"52"},{"id":"prob_11906","num":"69","diff":"중","page":"52"},{"id":"prob_11907","num":"70","diff":"중","page":"53"},{"id":"prob_11908","num":"71","diff":"상","page":"53"},{"id":"prob_11909","num":"72","diff":"대표문제","page":"53"},{"id":"prob_11910","num":"73","diff":"하","page":"53"},{"id":"prob_11911","num":"74","diff":"중","page":"53"},{"id":"prob_11912","num":"75","diff":"중","page":"53"},{"id":"prob_11913","num":"76","diff":"대표문제","page":"54"},{"id":"prob_11914","num":"77","diff":"중","page":"54"},{"id":"prob_11915","num":"78","diff":"중","page":"54"},{"id":"prob_11916","num":"79","diff":"대표문제","page":"54"},{"id":"prob_11917","num":"80","diff":"중","page":"54"},{"id":"prob_11918","num":"81","diff":"중","page":"54"},{"id":"prob_11919","num":"82","diff":"상","page":"54"},{"id":"prob_11920","num":"83","diff":"대표문제","page":"55"},{"id":"prob_11921","num":"84","diff":"중","page":"55"},{"id":"prob_11922","num":"85","diff":"중","page":"55"},{"id":"prob_11923","num":"86","diff":"중","page":"55"},{"id":"prob_11924","num":"87","diff":"중","page":"55"},{"id":"prob_11925","num":"88","diff":"중","page":"55"}]},{"subject":"공통수학1","book":"쎈B","unit1":"2. 방정식","unit2":"5. 이차방정식과 이차함수","unit3":"","problems":[{"id":"prob_11926","num":"1","diff":"대표문제","page":"57"},{"id":"prob_11927","num":"2","diff":"중","page":"57"},{"id":"prob_11928","num":"3","diff":"중","page":"57"},{"id":"prob_11929","num":"4","diff":"중","page":"57"},{"id":"prob_11930","num":"5","diff":"상","page":"57"},{"id":"prob_11931","num":"6","diff":"대표문제","page":"57"},{"id":"prob_11932","num":"7","diff":"중","page":"58"},{"id":"prob_11933","num":"8","diff":"중","page":"58"},{"id":"prob_11934","num":"9","diff":"중","page":"58"},{"id":"prob_11935","num":"10","diff":"상","page":"58"},{"id":"prob_11936","num":"11","diff":"대표문제","page":"58"},{"id":"prob_11937","num":"12","diff":"하","page":"58"},{"id":"prob_11938","num":"13","diff":"중","page":"58"},{"id":"prob_11939","num":"14","diff":"중","page":"59"},{"id":"prob_11940","num":"15","diff":"중","page":"59"},{"id":"prob_11941","num":"16","diff":"상","page":"59"},{"id":"prob_11942","num":"17","diff":"대표문제","page":"59"},{"id":"prob_11943","num":"18","diff":"중","page":"59"},{"id":"prob_11944","num":"19","diff":"중","page":"59"},{"id":"prob_11945","num":"20","diff":"중","page":"60"},{"id":"prob_11946","num":"21","diff":"상","page":"60"},{"id":"prob_11947","num":"22","diff":"대표문제","page":"60"},{"id":"prob_11948","num":"23","diff":"하","page":"60"},{"id":"prob_11949","num":"24","diff":"중","page":"60"},{"id":"prob_11950","num":"25","diff":"중","page":"60"},{"id":"prob_11951","num":"26","diff":"상","page":"60"},{"id":"prob_11952","num":"27","diff":"대표문제","page":"61"},{"id":"prob_11953","num":"28","diff":"중","page":"61"},{"id":"prob_11954","num":"29","diff":"중","page":"61"},{"id":"prob_11955","num":"30","diff":"상","page":"61"},{"id":"prob_11956","num":"31","diff":"대표문제","page":"61"},{"id":"prob_11957","num":"32","diff":"하","page":"61"},{"id":"prob_11958","num":"33","diff":"중","page":"62"},{"id":"prob_11959","num":"34","diff":"중","page":"62"},{"id":"prob_11960","num":"35","diff":"중","page":"62"},{"id":"prob_11961","num":"36","diff":"상","page":"62"},{"id":"prob_11962","num":"37","diff":"대표문제","page":"62"},{"id":"prob_11963","num":"38","diff":"하","page":"62"},{"id":"prob_11964","num":"39","diff":"중","page":"62"},{"id":"prob_11965","num":"40","diff":"중","page":"63"},{"id":"prob_11966","num":"41","diff":"상","page":"63"},{"id":"prob_11967","num":"42","diff":"대표문제","page":"63"},{"id":"prob_11968","num":"43","diff":"중","page":"63"},{"id":"prob_11969","num":"44","diff":"중","page":"63"},{"id":"prob_11970","num":"45","diff":"상","page":"63"},{"id":"prob_11971","num":"46","diff":"대표문제","page":"64"},{"id":"prob_11972","num":"47","diff":"중","page":"64"},{"id":"prob_11973","num":"48","diff":"중","page":"64"},{"id":"prob_11974","num":"49","diff":"중","page":"64"},{"id":"prob_11975","num":"50","diff":"상","page":"64"},{"id":"prob_11976","num":"51","diff":"상","page":"64"},{"id":"prob_11977","num":"52","diff":"대표문제","page":"65"},{"id":"prob_11978","num":"53","diff":"하","page":"65"},{"id":"prob_11979","num":"54","diff":"중","page":"65"},{"id":"prob_11980","num":"55","diff":"중","page":"65"},{"id":"prob_11981","num":"56","diff":"중","page":"65"},{"id":"prob_11982","num":"57","diff":"상","page":"65"}]},{"subject":"공통수학1","book":"쎈B","unit1":"2. 방정식","unit2":"6. 여러 가지 방정식","unit3":"","problems":[{"id":"prob_11983","num":"1","diff":"대표문제","page":"67"},{"id":"prob_11984","num":"2","diff":"중","page":"67"},{"id":"prob_11985","num":"3","diff":"중","page":"67"},{"id":"prob_11986","num":"4","diff":"중","page":"67"},{"id":"prob_11987","num":"5","diff":"중","page":"67"},{"id":"prob_11988","num":"6","diff":"대표문제","page":"67"},{"id":"prob_11989","num":"7","diff":"중","page":"67"},{"id":"prob_11990","num":"8","diff":"중","page":"67"},{"id":"prob_11991","num":"9","diff":"상","page":"68"},{"id":"prob_11992","num":"10","diff":"대표문제","page":"68"},{"id":"prob_11993","num":"11","diff":"중","page":"68"},{"id":"prob_11994","num":"12","diff":"중","page":"68"},{"id":"prob_11995","num":"13","diff":"중","page":"68"},{"id":"prob_11996","num":"14","diff":"상","page":"68"},{"id":"prob_11997","num":"15","diff":"대표문제","page":"68"},{"id":"prob_11998","num":"16","diff":"중","page":"68"},{"id":"prob_11999","num":"17","diff":"중","page":"69"},{"id":"prob_12000","num":"18","diff":"대표문제","page":"69"},{"id":"prob_12001","num":"19","diff":"중","page":"69"},{"id":"prob_12002","num":"20","diff":"중","page":"69"},{"id":"prob_12003","num":"21","diff":"상","page":"69"},{"id":"prob_12004","num":"22","diff":"대표문제","page":"69"},{"id":"prob_12005","num":"23","diff":"중","page":"69"},{"id":"prob_12006","num":"24","diff":"중","page":"70"},{"id":"prob_12007","num":"25","diff":"상","page":"70"},{"id":"prob_12008","num":"26","diff":"대표문제","page":"70"},{"id":"prob_12009","num":"27","diff":"하","page":"70"},{"id":"prob_12010","num":"28","diff":"중","page":"70"},{"id":"prob_12011","num":"29","diff":"중","page":"70"},{"id":"prob_12012","num":"30","diff":"중","page":"70"},{"id":"prob_12013","num":"31","diff":"대표문제","page":"70"},{"id":"prob_12014","num":"32","diff":"중","page":"71"},{"id":"prob_12015","num":"33","diff":"중","page":"71"},{"id":"prob_12016","num":"34","diff":"대표문제","page":"71"},{"id":"prob_12017","num":"35","diff":"하","page":"71"},{"id":"prob_12018","num":"36","diff":"중","page":"71"},{"id":"prob_12019","num":"37","diff":"중","page":"71"},{"id":"prob_12020","num":"38","diff":"중","page":"71"},{"id":"prob_12021","num":"39","diff":"상","page":"71"},{"id":"prob_12022","num":"40","diff":"대표문제","page":"72"},{"id":"prob_12023","num":"41","diff":"하","page":"72"},{"id":"prob_12024","num":"42","diff":"중","page":"72"},{"id":"prob_12025","num":"43","diff":"중","page":"72"},{"id":"prob_12026","num":"44","diff":"중","page":"72"},{"id":"prob_12027","num":"45","diff":"상","page":"72"},{"id":"prob_12028","num":"46","diff":"대표문제","page":"73"},{"id":"prob_12029","num":"47","diff":"중","page":"73"},{"id":"prob_12030","num":"48","diff":"상","page":"73"},{"id":"prob_12031","num":"49","diff":"상","page":"73"},{"id":"prob_12032","num":"50","diff":"대표문제","page":"73"},{"id":"prob_12033","num":"51","diff":"하","page":"73"},{"id":"prob_12034","num":"52","diff":"중","page":"74"},{"id":"prob_12035","num":"53","diff":"중","page":"74"},{"id":"prob_12036","num":"54","diff":"대표문제","page":"74"},{"id":"prob_12037","num":"55","diff":"중","page":"74"},{"id":"prob_12038","num":"56","diff":"중","page":"74"},{"id":"prob_12039","num":"57","diff":"대표문제","page":"74"},{"id":"prob_12040","num":"58","diff":"중","page":"74"},{"id":"prob_12041","num":"59","diff":"상","page":"75"},{"id":"prob_12042","num":"60","diff":"대표문제","page":"75"},{"id":"prob_12043","num":"61","diff":"중","page":"75"},{"id":"prob_12044","num":"62","diff":"중","page":"75"},{"id":"prob_12045","num":"63","diff":"대표문제","page":"75"},{"id":"prob_12046","num":"64","diff":"중","page":"75"},{"id":"prob_12047","num":"65","diff":"중","page":"75"},{"id":"prob_12048","num":"66","diff":"상","page":"76"},{"id":"prob_12049","num":"67","diff":"대표문제","page":"76"},{"id":"prob_12050","num":"68","diff":"중","page":"76"},{"id":"prob_12051","num":"69","diff":"상","page":"76"},{"id":"prob_12052","num":"70","diff":"대표문제","page":"76"},{"id":"prob_12053","num":"71","diff":"중","page":"76"},{"id":"prob_12054","num":"72","diff":"상","page":"76"}]}],"totalCount":429,"createdAt":"2026-10-10T14:25:25.661Z"};
+(function(){
+  var urlName=(new URLSearchParams(location.search).get('name')||'').trim();
+  if(urlName) DATA.studentName=urlName;
+})();
+var checkedIds = {};
+var DISP='nd';
+try{ var _d=localStorage.getItem('checkDisp'); if(_d==='nd'||_d==='np'||_d==='ndp') DISP=_d; }catch(e){}
+var savedComment='';
+var app=document.getElementById('app');
+var footer=document.getElementById('footer');
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function showToast(m){ var t=document.getElementById('toast'); if(!t)return; t.textContent=m; t.classList.add('show'); clearTimeout(window.__tt); window.__tt=setTimeout(function(){t.classList.remove('show');},1800); }
+function updateCount(){ var n=0; for(var k in checkedIds) if(checkedIds[k]) n++; var el=document.getElementById('cntNum'); if(el) el.textContent=n; var s=document.getElementById('selCnt'); if(s) s.textContent=n; }
+
+function buildTree(groups){
+  var roots=[], rmap={};
+  (groups||[]).forEach(function(g){
+    var u1=g.unit1||'(단원 미지정)', u2=g.unit2||'', u3=g.unit3||'';
+    if(!rmap[u1]){ rmap[u1]={name:u1,kids:{},karr:[],probs:[]}; roots.push(rmap[u1]); }
+    var n1=rmap[u1];
+    if(!u2){ n1.probs=n1.probs.concat(g.problems||[]); return; }
+    if(!n1.kids[u2]){ n1.kids[u2]={name:u2,kids:{},karr:[],probs:[]}; n1.karr.push(n1.kids[u2]); }
+    var n2=n1.kids[u2];
+    if(!u3){ n2.probs=n2.probs.concat(g.problems||[]); return; }
+    if(!n2.kids[u3]){ n2.kids[u3]={name:u3,kids:{},karr:[],probs:[]}; n2.karr.push(n2.kids[u3]); }
+    n2.kids[u3].probs=n2.kids[u3].probs.concat(g.problems||[]);
+  });
+  return roots;
+}
+function chipInner(p){
+  var s=esc(p.num||'?');
+  if((DISP==='nd'||DISP==='ndp') && p.diff) s+='<span class="df">'+esc(p.diff)+'</span>';
+  if((DISP==='np'||DISP==='ndp') && p.page) s+='<span class="pg">p.'+esc(p.page)+'</span>';
+  return s;
+}
+function chipHtml(p){ return '<button class="chip'+(checkedIds[p.id]?' on':'')+'" data-id="'+esc(p.id)+'">'+chipInner(p)+'</button>'; }
+
+var midStore={};
+function renderCheck(){
+  var groups=DATA.groups||[];
+  var roots=buildTree(groups);
+  var g0=groups[0]||{};
+  var label=[g0.subject,g0.book].filter(Boolean).join(' · ');
+  midStore={}; var midIdx=0;
+  var h='<div class="page-head"><h2>'+(DATA.studentName?esc(DATA.studentName)+' 학생의 오답 체크':'오답 체크')+'</h2>'
+    +'<div class="desc">'+(label?esc(label)+' — ':'')+'단원을 눌러 펼친 후, 틀린 문제를 체크하세요</div></div>';
+  if(!roots.length){ h+='<div class="state">문제가 없습니다.</div>'; app.innerHTML=h; footer.style.display='none'; return; }
+  h+='<div class="topbar"><div class="sel">선택된 문제 <b id="selCnt">0</b>개</div><button class="foldbtn" id="foldAll">모두 펼치기</button></div>';
+  h+='<div class="disp">'
+    +'<button data-d="nd" class="'+(DISP==='nd'?'on':'')+'">번호·난이도</button>'
+    +'<button data-d="np" class="'+(DISP==='np'?'on':'')+'">번호·페이지</button>'
+    +'<button data-d="ndp" class="'+(DISP==='ndp'?'on':'')+'">번호·난이도·페이지</button>'
+    +'</div>';
+  roots.forEach(function(u1){
+    h+='<div class="sec"><div class="sec-h">'+esc(u1.name)+'</div>';
+    var mids=[];
+    if(u1.probs && u1.probs.length) mids.push({ name:'전체 문제', probs:u1.probs, subs:[] });
+    u1.karr.forEach(function(u2){ mids.push({ name:u2.name, probs:u2.probs, subs:u2.karr }); });
+    mids.forEach(function(m){
+      var mid='m'+(midIdx++);
+      var all=[].concat(m.probs||[]); (m.subs||[]).forEach(function(u3){ all=all.concat(u3.probs||[]); });
+      midStore[mid]=all.map(function(p){return p.id;});
+      h+='<div class="mid"><div class="mid-h" data-mid="'+mid+'"><span class="tw">&#9654;</span><span class="t">'+esc(m.name)+'</span><span class="c">'+all.length+'문제</span></div>';
+      h+='<div class="mid-body" id="body-'+mid+'" style="display:none">';
+      h+='<button class="selall" data-selall="'+mid+'">이 단원 전체 선택</button>';
+      var wide=(DISP==='ndp'?' wide':'');
+      if(m.probs && m.probs.length) h+='<div class="probs'+wide+'">'+m.probs.map(chipHtml).join('')+'</div>';
+      (m.subs||[]).forEach(function(u3){
+        h+='<div class="sub-h">'+esc(u3.name)+'</div><div class="probs'+wide+'">'+(u3.probs||[]).map(chipHtml).join('')+'</div>';
+      });
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  h+='<div class="cmt-card"><div class="lbl">선생님께 전하고 싶은 말</div>'
+    +'<textarea class="cmt" id="cmt" placeholder="이해 안 되는 부분, 헷갈리는 개념, 더 연습하고 싶은 유형 등 자유롭게 적어주세요. 없으면 비워두어도 괜찮아요."></textarea></div>';
+  app.innerHTML=h; footer.style.display=''; updateCount();
+  var _c=document.getElementById('cmt'); if(_c){ _c.value=savedComment; _c.addEventListener('input',function(){ savedComment=_c.value; }); }
+  app.querySelectorAll('.disp button').forEach(function(b){ b.onclick=function(){ var c=document.getElementById('cmt'); if(c) savedComment=c.value; DISP=b.dataset.d; try{ localStorage.setItem('checkDisp',DISP);}catch(e){} renderCheck(); }; });
+  app.querySelectorAll('.mid-h').forEach(function(hd){ hd.onclick=function(e){ if(e.target.closest('[data-selall]'))return; var body=document.getElementById('body-'+hd.dataset.mid); var open=body.style.display!=='none'; body.style.display=open?'none':''; hd.classList.toggle('open',!open); }; });
+  app.querySelectorAll('.chip').forEach(function(c){ c.onclick=function(){ var id=c.dataset.id; if(checkedIds[id]){ delete checkedIds[id]; c.classList.remove('on'); } else { checkedIds[id]=true; c.classList.add('on'); } updateCount(); }; });
+  app.querySelectorAll('[data-selall]').forEach(function(b){ b.onclick=function(){ var ids=midStore[b.dataset.selall]||[]; var allOn=ids.every(function(id){return checkedIds[id];}); ids.forEach(function(id){ if(allOn) delete checkedIds[id]; else checkedIds[id]=true; }); var body=document.getElementById('body-'+b.dataset.selall); if(body) body.querySelectorAll('.chip').forEach(function(c){ c.classList.toggle('on', !!checkedIds[c.dataset.id]); }); updateCount(); }; });
+  var fold=document.getElementById('foldAll');
+  if(fold) fold.onclick=function(){ var bodies=app.querySelectorAll('.mid-body'); var anyClosed=Array.prototype.some.call(bodies,function(b){return b.style.display==='none';}); bodies.forEach(function(b){ b.style.display=anyClosed?'':'none'; }); app.querySelectorAll('.mid-h').forEach(function(hd){ hd.classList.toggle('open', anyClosed); }); fold.textContent=anyClosed?'모두 접기':'모두 펼치기'; };
+}
+
+function submitFile(){
+  var ids=Object.keys(checkedIds).filter(function(k){return checkedIds[k];});
+  if(!ids.length){ if(!confirm('체크한 문제가 없습니다. 그래도 제출할까요?')) return; }
+  var comment=(document.getElementById('cmt')&&document.getElementById('cmt').value||'').trim();
+  var uset={};
+  (DATA.groups||[]).forEach(function(g){ (g.problems||[]).forEach(function(p){ if(checkedIds[p.id]){ var k=(g.unit1||'')+'|'+(g.unit2||'')+'|'+(g.unit3||''); if(!uset[k]) uset[k]={unit1:g.unit1||'',unit2:g.unit2||'',unit3:g.unit3||'',count:0}; uset[k].count++; } }); });
+  var units=[]; for(var k in uset) units.push(uset[k]);
+  var now=new Date();
+  var mm=String(now.getMonth()+1); if(mm.length<2) mm='0'+mm;
+  var dd=String(now.getDate()); if(dd.length<2) dd='0'+dd;
+  var dateStr=now.getFullYear()+mm+dd;
+  var result={ type:'wrong-note-submission', version:2, studentName:DATA.studentName, suffix:DATA.suffix, submittedAt:now.toISOString(), originalCreatedAt:DATA.createdAt, checkedIds:ids, comment:comment, checkedUnits:units };
+  var safeName=(DATA.studentName||'학생').replace(/[\/\\:*?"<>|]/g,'_');
+  var safeSuffix=DATA.suffix?('_'+DATA.suffix.replace(/[\/\\:*?"<>|]/g,'_')):'';
+  var filename='오답제출_'+safeName+safeSuffix+'_'+dateStr+'.json';
+  var jsonText=JSON.stringify(result,null,2);
+  var isMobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  try{
+    if(isMobile && window.File && navigator.canShare){
+      var file=new File([jsonText], filename, {type:'application/json'});
+      if(navigator.canShare({files:[file]})){
+        navigator.share({files:[file], title:'오답 제출 - '+(DATA.studentName||''), text:filename})
+          .then(function(){ showToast('공유 완료!'); })
+          .catch(function(err){ if(err&&err.name==='AbortError')return; fallbackDownload(jsonText, filename, isMobile); });
+        return;
+      }
+    }
+  }catch(e){}
+  fallbackDownload(jsonText, filename, isMobile);
+}
+function fallbackDownload(jsonText, filename, isMobile){
+  try{
+    var blob=new Blob([jsonText], {type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    showSendGuide(filename, isMobile);
+  }catch(e){
+    var fa=document.createElement('div');
+    fa.style.cssText='position:fixed;inset:0;background:white;padding:20px;overflow:auto;z-index:99999;';
+    fa.innerHTML='<h2 style="margin-top:0;">다운로드가 안 되는 환경입니다</h2><p>아래 내용을 모두 복사해 메모장에 붙여넣고 '+esc(filename)+' 이름으로 저장해주세요.</p><button onclick="this.parentElement.remove()" style="margin-bottom:10px;">닫기</button><textarea readonly style="width:100%;height:60vh;font-family:monospace;font-size:11px;">'+esc(jsonText)+'</textarea>';
+    document.body.appendChild(fa);
+  }
+}
+function showSendGuide(filename, isMobile){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  var steps=isMobile
+    ? ['파일이 저장됐어요.','저장된 파일을 카카오톡으로 선생님께 전송해주세요. ("파일" 앱에서 방금 받은 파일을 찾아 공유 → 카카오톡)']
+    : ['다운로드 폴더에 파일이 저장됐어요. (파일명: '+filename+')','이 파일을 카카오톡으로 선생님께 전송해주세요. (카톡 대화창에 끌어다 놓거나, 첨부 → 파일 선택)'];
+  var lis=steps.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('');
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:420px;width:100%;padding:24px;">'
+    +'<div style="font-size:20px;font-weight:800;margin-bottom:6px;">결과 파일이 저장됐어요!</div>'
+    +'<div style="font-size:14px;color:#555;margin-bottom:16px;">이제 선생님께 보내기만 하면 끝이에요.</div>'
+    +'<ol style="margin:0 0 18px;padding-left:22px;line-height:1.9;font-size:15px;">'+lis+'</ol>'
+    +'<div style="background:#eaf0f8;border-radius:10px;padding:12px 14px;font-size:13px;color:#34568b;margin-bottom:16px;">파일을 못 찾겠으면, 카톡으로 "선생님 파일 어떻게 보내요?"라고 물어보세요!</div>'
+    +'<button style="width:100%;padding:13px;border:none;border-radius:10px;background:#34568b;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">확인</button></div>';
+  ov.querySelector('button').onclick=function(){ ov.remove(); };
+  document.body.appendChild(ov);
+}
+
+renderCheck();
+</script>
+</body>
+</html>
